@@ -4,7 +4,7 @@ This module installs the External Secrets Operator in a Kubernetes cluster using
 
 ## Requirements
 
-- Terraform >= 1.0.0
+- Terraform >= 1.5+
 - Helm provider >= 2.0.0
 - Kubernetes provider >= 2.0.0
 - A Kubernetes cluster

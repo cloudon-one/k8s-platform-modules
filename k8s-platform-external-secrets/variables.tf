@@ -31,7 +31,7 @@ variable "install_crds" {
 variable "service_account_name" {
   description = "Name of the service account to create"
   type        = string
-  default     = "external-secrets"
+  default     = ""
 }
 
 variable "service_account_annotations" {
@@ -79,7 +79,7 @@ variable "additional_set_values" {
 variable "create_aws_iam_role" {
   description = "Whether to create an AWS IAM role for external-secrets"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "aws_iam_role_name" {
