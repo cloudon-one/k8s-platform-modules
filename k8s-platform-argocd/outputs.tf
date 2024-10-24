@@ -1,3 +1,5 @@
+# outputs.tf
+
 output "argocd_namespace" {
   description = "Namespace where ArgoCD is installed"
   value       = kubernetes_namespace.argocd.metadata[0].name
@@ -20,20 +22,40 @@ output "monitoring_enabled" {
 
 output "prometheus_rules" {
   description = "Name of the PrometheusRules resource"
-  value       = var.enable_monitoring ? kubernetes_manifest.argocd_prometheusrule[0].manifest.metadata.name : null
+  value       = try(var.enable_monitoring ? kubernetes_manifest.argocd_prometheusrule[0].manifest.metadata.name : null, null)
 }
 
 output "grafana_dashboard" {
   description = "Name of the Grafana dashboard ConfigMap"
-  value       = var.enable_monitoring ? kubernetes_config_map.argocd_dashboard[0].metadata[0].name : null
+  value       = try(var.enable_monitoring ? kubernetes_config_map.argocd_dashboard[0].metadata[0].name : null, null)
 }
 
 output "configured_repositories" {
   description = "List of configured repository names"
-  value       = [for repo in kubernetes_manifest.repository : repo.manifest.metadata.name]
+  value       = [
+    for repo in var.repositories : repo.name
+    if lookup(kubernetes_secret.repo_credentials, repo.name, null) != null
+  ]
 }
 
-output "github_apps" {
+output "repository_secrets" {
+  description = "Map of repository names to their secret names"
+  value = {
+    for name, secret in kubernetes_secret.repo_credentials : name => secret.metadata[0].name
+  }
+  sensitive = true
+}
+
+output "github_app_configs" {
   description = "List of configured GitHub App IDs"
-  value       = [for app in kubernetes_secret.github_app_credentials : app.data.id]
+  value       = [
+    for app in var.github_apps : app.id
+  ]
+}
+
+output "certificate_configs" {
+  description = "List of configured repository certificate server names"
+  value       = [
+    for cert in var.repositories_cert : cert.server_name
+  ]
 }
