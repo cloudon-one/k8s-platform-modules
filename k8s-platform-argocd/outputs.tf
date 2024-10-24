@@ -36,6 +36,7 @@ output "configured_repositories" {
     for repo in var.repositories : repo.name
     if lookup(kubernetes_secret.repo_credentials, repo.name, null) != null
   ]
+  sensitive = true
 }
 
 output "repository_secrets" {
