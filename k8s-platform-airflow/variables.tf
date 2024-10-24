@@ -16,7 +16,7 @@ variable "private_subnet_ids" {
 variable "airflow_version" {
   description = "Apache Airflow version"
   type        = string
-  default     = ""
+  default     = "2.7.1"
 }
 
 variable "instance_type" {
@@ -26,7 +26,6 @@ variable "instance_type" {
 }
 
 variable "eks_cluster_name" {
-  description = "EKS cluster to deploy airflow"
+  description = "Name of the EKS cluster"
   type        = string
-  default     = ""
 }

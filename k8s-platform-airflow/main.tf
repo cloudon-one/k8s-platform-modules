@@ -1,3 +1,61 @@
+# Random password for RDS
+resource "random_password" "db_password" {
+  length  = 16
+  special = true
+}
+
+# Security group for Airflow components
+resource "aws_security_group" "airflow" {
+  name_prefix = "airflow-${var.environment}-"
+  vpc_id      = var.vpc_id
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Environment = var.environment
+    Name        = "airflow-main-sg"
+  }
+}
+
+# IAM role for EKS node group
+resource "aws_iam_role" "eks_node_group" {
+  name = "airflow-${var.environment}-eks-node-group"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+# Attach required policies to node group role
+resource "aws_iam_role_policy_attachment" "eks_worker_node_policy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+  role       = aws_iam_role.eks_node_group.name
+}
+
+resource "aws_iam_role_policy_attachment" "eks_cni_policy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+  role       = aws_iam_role.eks_node_group.name
+}
+
+resource "aws_iam_role_policy_attachment" "eks_container_registry" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+  role       = aws_iam_role.eks_node_group.name
+}
+
 # RDS for Airflow metadata
 resource "aws_db_instance" "airflow_metadata" {
   identifier        = "airflow-${var.environment}-metadata"
@@ -19,6 +77,28 @@ resource "aws_db_instance" "airflow_metadata" {
   tags = {
     Environment = var.environment
     Name        = "airflow-metadata-db"
+  }
+}
+
+# DB subnet group
+resource "aws_db_subnet_group" "airflow" {
+  name       = "airflow-${var.environment}"
+  subnet_ids = var.private_subnet_ids
+
+  tags = {
+    Environment = var.environment
+    Name        = "airflow-db-subnet-group"
+  }
+}
+
+# ElastiCache subnet group
+resource "aws_elasticache_subnet_group" "airflow" {
+  name       = "airflow-${var.environment}-cache"
+  subnet_ids = var.private_subnet_ids
+
+  tags = {
+    Environment = var.environment
+    Name        = "airflow-cache-subnet-group"
   }
 }
 
@@ -88,6 +168,11 @@ resource "aws_security_group" "rds" {
     protocol        = "tcp"
     security_groups = [aws_security_group.airflow.id]
   }
+
+  tags = {
+    Environment = var.environment
+    Name        = "airflow-rds-sg"
+  }
 }
 
 resource "aws_security_group" "redis" {
@@ -99,6 +184,11 @@ resource "aws_security_group" "redis" {
     to_port         = 6379
     protocol        = "tcp"
     security_groups = [aws_security_group.airflow.id]
+  }
+
+  tags = {
+    Environment = var.environment
+    Name        = "airflow-redis-sg"
   }
 }
 
