@@ -71,12 +71,6 @@ variable "tags" {
   default     = {}
 }
 
-  validation {
-    condition     = var.cluster_instance_profile == null || can(regex("^[\\w+=,.@-]+$", var.cluster_instance_profile))
-    error_message = "Instance profile name must match pattern: ^[\\w+=,.@-]+$"
-  }
-}
-
 variable "create_instance_profile" {
   description = "Whether to create a new instance profile. If false, cluster_instance_profile must be provided."
   type        = bool
