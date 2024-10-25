@@ -103,6 +103,7 @@ variable "acme_server" {
 variable "acme_email" {
   description = "Email address for ACME registration"
   type        = string
+  default = "paltform@cloudon.work"
 }
 
 variable "dns_challenge_enabled" {
