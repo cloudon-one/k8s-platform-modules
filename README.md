@@ -29,27 +29,27 @@ The platform stack consists of the following components:
 .
 ├── LICENSE
 ├── README.md
-├── common.hcl                # Common Terragrunt configurations
-├── platform_vars.yaml        # Platform-wide variables
-├── terragrunt.hcl           # Root Terragrunt configuration
+├── common.hcl                  # Common Terragrunt configurations
+├── platform_vars.yaml          # Platform-wide variables
+├── terragrunt.hcl              # Root Terragrunt configuration
 │
-├── airflow/                  # Apache Airflow deployment
-├── argocd/                  # Argo CD deployment
-├── cert-manager/            # Certificate management
-├── external-dns/            # DNS automation
-├── external-secrets/        # External secrets management
-├── istio/                   # Service mesh
-├── jaeger/                  # Distributed tracing
-├── karpenter/              # Node autoscaling
-├── kong-ingress/           # API Gateway
-├── kubecost/               # Cost monitoring
-└── loki-stack/             # Logging stack
+├── airflow/                    # Apache Airflow deployment
+├── argocd/                     # Argo CD deployment
+├── cert-manager/               # Certificate management
+├── external-dns/               # DNS automation
+├── external-secrets/           # External secrets management
+├── istio/                      # Service mesh
+├── jaeger/                     # Distributed tracing
+├── karpenter/                  # Node autoscaling
+├── kong-ingress/               # API Gateway
+├── kubecost/                   # Cost monitoring
+└── loki-stack/                 # Logging stack
 ```
 
 ## Prerequisites
 
-- Terraform >= 1.0.0
-- Terragrunt >= 0.35.0
+- Terraform >= 1.5.0
+- Terragrunt >= 0.60.0
 - kubectl configured with cluster access
 - AWS CLI configured (if using AWS)
 
