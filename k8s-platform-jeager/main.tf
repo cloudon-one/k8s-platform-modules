@@ -23,6 +23,19 @@ resource "helm_release" "jaeger_operator" {
   ]
 }
 
+locals {
+  elasticsearch_config = var.storage_type == "elasticsearch" ? {
+    elasticsearch = {
+      nodeCount = var.elasticsearch_node_count
+      resources = var.elasticsearch_resources
+      storage = {
+        size = var.elasticsearch_storage_size
+        class = var.elasticsearch_storage_class
+      }
+    }
+  } : {}
+}
+
 resource "kubectl_manifest" "jaeger" {
   count = var.create_jaeger_instance ? 1 : 0
 
@@ -33,26 +46,13 @@ resource "kubectl_manifest" "jaeger" {
       name      = var.jaeger_name
       namespace = var.jaeger_namespace
     }
-    spec = {
+    spec = merge({
       strategy = var.deployment_strategy
 
       # Storage configuration
       storage = {
         type = var.storage_type
         options = var.storage_options
-
-        # Elasticsearch specific configuration
-        dynamic "elasticsearch" {
-          for_each = var.storage_type == "elasticsearch" ? [1] : []
-          content {
-            nodeCount = var.elasticsearch_node_count
-            resources = var.elasticsearch_resources
-            storage = {
-              size = var.elasticsearch_storage_size
-              class = var.elasticsearch_storage_class
-            }
-          }
-        }
       }
 
       # Ingress configuration
@@ -62,9 +62,6 @@ resource "kubectl_manifest" "jaeger" {
         hosts = var.ingress_hosts
         tls = var.ingress_tls
       }
-    }
-  })
-}
 
       # Query configuration
       query = {
@@ -100,7 +97,7 @@ resource "kubectl_manifest" "jaeger" {
       # Additional configuration
       annotations = var.jaeger_annotations
       labels = var.jaeger_labels
-    }
+    }, local.elasticsearch_config)
   })
 
   depends_on = [helm_release.jaeger_operator]
