@@ -38,12 +38,12 @@ resource "helm_release" "karpenter" {
 
   set {
     name  = "settings.aws.clusterEndpoint"
-    value = local.cluster_endpoint
+    value = data.aws_eks_cluster.cluster.endpoint
   }
 
   set {
     name  = "settings.aws.defaultInstanceProfile"
-    value = var.cluster_instance_profile
+    value = data.aws_iam_instance_profile.eks_node.name
   }
 
   values = [var.helm_values]

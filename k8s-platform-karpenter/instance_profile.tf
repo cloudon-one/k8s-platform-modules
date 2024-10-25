@@ -39,8 +39,4 @@ resource "aws_iam_instance_profile" "eks_node" {
   tags = var.tags
 }
 
-# Data source to get existing instance profile if provided
-data "aws_iam_instance_profile" "existing" {
-  count = var.cluster_instance_profile != null ? 1 : 0
-  name  = var.cluster_instance_profile
-}
+
