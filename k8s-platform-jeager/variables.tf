@@ -19,7 +19,7 @@ variable "create_namespace" {
 variable "operator_version" {
   description = "Version of Jaeger Operator to install"
   type        = string
-  default     = "2.45.0"
+  default     = "1.62.0"
 }
 
 variable "operator_service_account_name" {
@@ -267,7 +267,7 @@ variable "jaeger_labels" {
 variable "install_otel_collector" {
   description = "Whether to install OpenTelemetry Collector"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "otel_collector_replicas" {
