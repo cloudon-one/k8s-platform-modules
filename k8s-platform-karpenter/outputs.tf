@@ -28,12 +28,3 @@ output "instance_profile_arn" {
   value       = local.instance_profile_arn
 }
 
-output "instance_profile_role_name" {
-  description = "Name of the IAM role associated with the instance profile"
-  value       = var.create_instance_profile ? aws_iam_role.eks_node.name : null
-}
-
-output "instance_profile_role_arn" {
-  description = "ARN of the IAM role associated with the instance profile"
-  value       = var.create_instance_profile ? aws_iam_role.eks_node.arn : null
-}
