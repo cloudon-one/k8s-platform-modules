@@ -71,11 +71,6 @@ variable "tags" {
   default     = {}
 }
 
-variable "cluster_instance_profile" {
-  description = "Name of the IAM instance profile for the EKS nodes. If not provided, a new instance profile will be created."
-  type        = string
-  default     = null
-
   validation {
     condition     = var.cluster_instance_profile == null || can(regex("^[\\w+=,.@-]+$", var.cluster_instance_profile))
     error_message = "Instance profile name must match pattern: ^[\\w+=,.@-]+$"

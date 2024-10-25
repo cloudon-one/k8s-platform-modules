@@ -44,9 +44,3 @@ data "aws_iam_instance_profile" "existing" {
   count = var.cluster_instance_profile != null ? 1 : 0
   name  = var.cluster_instance_profile
 }
-
-locals {
-  # Use existing profile if provided, otherwise use the created one
-  instance_profile_name = coalesce(var.cluster_instance_profile, aws_iam_instance_profile.eks_node.name)
-  instance_profile_arn  = var.cluster_instance_profile != null ? data.aws_iam_instance_profile.existing[0].arn : aws_iam_instance_profile.eks_node.arn
-}
