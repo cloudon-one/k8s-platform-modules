@@ -8,3 +8,8 @@ data "aws_eks_cluster" "cluster" {
 data "aws_eks_cluster_auth" "cluster" {
   name = var.eks_cluster_name
 }
+
+output "cluster_endpoint" {
+  description = "The endpoint for the EKS cluster"
+  value       = data.aws_eks_cluster.cluster.endpoint
+}

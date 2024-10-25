@@ -70,3 +70,33 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "cluster_instance_profile" {
+  description = "Name of the IAM instance profile for the EKS nodes. If not provided, a new instance profile will be created."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.cluster_instance_profile == null || can(regex("^[\\w+=,.@-]+$", var.cluster_instance_profile))
+    error_message = "Instance profile name must match pattern: ^[\\w+=,.@-]+$"
+  }
+}
+
+variable "create_instance_profile" {
+  description = "Whether to create a new instance profile. If false, cluster_instance_profile must be provided."
+  type        = bool
+  default     = true
+}
+
+variable "instance_profile_path" {
+  description = "Path for the instance profile"
+  type        = string
+  default     = "/"
+}
+
+# Optional: Additional policies to attach to the instance profile role
+variable "additional_instance_profile_policies" {
+  description = "List of additional IAM policy ARNs to attach to the instance profile role"
+  type        = list(string)
+  default     = []
+}
