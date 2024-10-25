@@ -71,11 +71,11 @@ variable "tags" {
   default     = {}
 }
 
-variable "create_instance_profile" {
-  description = "Whether to create a new instance profile. If false, cluster_instance_profile must be provided."
-  type        = bool
-  default     = true
-}
+#variable "create_instance_profile" {
+#  description = "Whether to create a new instance profile. If false, cluster_instance_profile must be provided."
+#  type        = bool
+#  default     = true
+#}
 
 variable "instance_profile_path" {
   description = "Path for the instance profile"
