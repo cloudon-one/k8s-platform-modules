@@ -77,11 +77,11 @@ variable "tags" {
 #  default     = true
 #}
 
-variable "instance_profile_path" {
-  description = "Path for the instance profile"
-  type        = string
-  default     = "/"
-}
+#variable "instance_profile_path" {
+#  description = "Path for the instance profile"
+#  type        = string
+#  default     = "/"
+#}
 
 # Optional: Additional policies to attach to the instance profile role
 variable "additional_instance_profile_policies" {
