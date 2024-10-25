@@ -43,7 +43,7 @@ resource "helm_release" "karpenter" {
 
   set {
     name  = "settings.aws.defaultInstanceProfile"
-    value = aws_iam_instance_profile.eks_node.name
+    value = aws_iam_instance_profile.eks_node.id
   }
 
   values = [var.helm_values]
