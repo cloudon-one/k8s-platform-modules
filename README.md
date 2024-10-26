@@ -12,6 +12,7 @@ The platform stack consists of the following components:
 - **external-secrets**: External secrets management
 - **kong-ingress**: API Gateway and Ingress controller
 - **karpenter**: Kubernetes node autoscaling
+- **vault**: Secrets management
 
 ### Observability Stack
 - **jaeger**: Distributed tracing
@@ -44,6 +45,7 @@ The platform stack consists of the following components:
 ├── kong-ingress/               # API Gateway
 ├── kubecost/                   # Cost monitoring
 └── loki-stack/                 # Logging stack
+
 ```
 
 ## Prerequisites
