@@ -14,6 +14,7 @@ A collection of Terraform modules for deploying and managing a comprehensive Kub
 - **[Istio](./k8s-platform-istio)**: Service Mesh
 - **[Kong Gateway](./k8s-platform-kong-gw)**: API Gateway
 - **[Jaeger](./k8s-platform-jeager)**: Distributed Tracing
+- **vault**: Secrets management
 
 ### Observability & Monitoring
 - **[Loki Stack](./k8s-platform-loki-stack)**: Log Aggregation
@@ -21,6 +22,41 @@ A collection of Terraform modules for deploying and managing a comprehensive Kub
 - **[ArgoCD](./k8s-platform-argocd)**: GitOps & Deployment Management
 
 ### Platform Tools
+- **argocd**: GitOps continuous delivery
+- **airflow**: Workflow orchestration
+
+## Repository Structure
+
+```
+.
+├── LICENSE
+├── README.md
+├── common.hcl                  # Common Terragrunt configurations
+├── platform_vars.yaml          # Platform-wide variables
+├── terragrunt.hcl              # Root Terragrunt configuration
+│
+├── airflow/                    # Apache Airflow deployment
+├── argocd/                     # Argo CD deployment
+├── cert-manager/               # Certificate management
+├── external-dns/               # DNS automation
+├── external-secrets/           # External secrets management
+├── istio/                      # Service mesh
+├── jaeger/                     # Distributed tracing
+├── karpenter/                  # Node autoscaling
+├── kong-ingress/               # API Gateway
+├── kubecost/                   # Cost monitoring
+└── loki-stack/                 # Logging stack
+
+```
+
+## Prerequisites
+
+- Terraform >= 1.5.0
+- Terragrunt >= 0.60.0
+- kubectl configured with cluster access
+- AWS CLI configured (if using AWS)
+
+## Getting Started
 - **[Airflow](./k8s-platform-airflow)**: Workflow Management
 - **[Atlantis](./k8s-platform-atlantis)**: Terraform Automation
 - **[Vault](./k8s-platform-vault)**: Secrets Management
@@ -356,6 +392,7 @@ graph TD
 ## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
 
 ## ✨ Best Practices
 
