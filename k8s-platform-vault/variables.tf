@@ -70,14 +70,6 @@ variable "helm_values" {
   default     = {}
 }
 
-
-
-variable "replicas" {
-  description = "Number of Vault replicas"
-  type        = number
-  default     = 3
-}
-
 variable "kms_key_id" {
   description = "AWS KMS key ID for auto-unsealing"
   type        = string
