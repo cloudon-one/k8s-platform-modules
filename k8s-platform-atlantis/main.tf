@@ -26,13 +26,13 @@ resource "kubernetes_secret" "atlantis_secrets" {
   }
 
   data = {
-    ATLANTIS_GH_TOKEN       = var.github_token
-    ATLANTIS_GH_WEBHOOK_SECRET = var.github_webhook_secret
-    ATLANTIS_GITLAB_TOKEN   = var.gitlab_token
-    ATLANTIS_GITLAB_WEBHOOK_SECRET = var.gitlab_webhook_secret
-    AWS_ACCESS_KEY_ID      = var.aws_access_key
-    AWS_SECRET_ACCESS_KEY  = var.aws_secret_key
-    ATLANTIS_REPO_CONFIG   = var.repo_config_json
+    ATLANTIS_GH_TOKEN               = var.github_token
+    ATLANTIS_GH_WEBHOOK_SECRET      = var.github_webhook_secret
+    ATLANTIS_GITLAB_TOKEN           = var.gitlab_token
+    ATLANTIS_GITLAB_WEBHOOK_SECRET  = var.gitlab_webhook_secret
+    AWS_ACCESS_KEY_ID               = var.aws_access_key
+    AWS_SECRET_ACCESS_KEY           = var.aws_secret_key
+    ATLANTIS_REPO_CONFIG            = var.repo_config_json
   }
 
   depends_on = [kubernetes_namespace.atlantis]

@@ -1,7 +1,9 @@
 # Kubernetes Platform Terraform Modules
 
 A collection of Terraform modules for deploying and managing a comprehensive Kubernetes platform with essential services and tools.
+A collection of Terraform modules for deploying and managing a comprehensive Kubernetes platform with essential services and tools.
 
+## 🚀 Platform Components
 ## 🚀 Platform Components
 
 ### Core Infrastructure
@@ -22,41 +24,6 @@ A collection of Terraform modules for deploying and managing a comprehensive Kub
 - **[ArgoCD](./k8s-platform-argocd)**: GitOps & Deployment Management
 
 ### Platform Tools
-- **argocd**: GitOps continuous delivery
-- **airflow**: Workflow orchestration
-
-## Repository Structure
-
-```
-.
-├── LICENSE
-├── README.md
-├── common.hcl                  # Common Terragrunt configurations
-├── platform_vars.yaml          # Platform-wide variables
-├── terragrunt.hcl              # Root Terragrunt configuration
-│
-├── airflow/                    # Apache Airflow deployment
-├── argocd/                     # Argo CD deployment
-├── cert-manager/               # Certificate management
-├── external-dns/               # DNS automation
-├── external-secrets/           # External secrets management
-├── istio/                      # Service mesh
-├── jaeger/                     # Distributed tracing
-├── karpenter/                  # Node autoscaling
-├── kong-ingress/               # API Gateway
-├── kubecost/                   # Cost monitoring
-└── loki-stack/                 # Logging stack
-
-```
-
-## Prerequisites
-
-- Terraform >= 1.5.0
-- Terragrunt >= 0.60.0
-- kubectl configured with cluster access
-- AWS CLI configured (if using AWS)
-
-## Getting Started
 - **[Airflow](./k8s-platform-airflow)**: Workflow Management
 - **[Atlantis](./k8s-platform-atlantis)**: Terraform Automation
 - **[Vault](./k8s-platform-vault)**: Secrets Management
@@ -386,10 +353,43 @@ graph TD
 1. Fork the repository
 2. Create your feature branch
 3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+4. Create a pull request
 
-## 📝 License
+## Security
+
+- All secrets are managed through external-secrets
+- TLS certificates are managed by cert-manager
+- Network policies are enforced through Istio
+- Regular security scanning with built-in tools
+
+## Maintenance
+
+### Regular Tasks
+
+- Update component versions
+- Review resource utilization
+- Monitor costs with Kubecost
+- Backup critical configurations
+
+### Version Updates
+
+Update component versions in respective `terragrunt.hcl` files:
+```hcl
+inputs = {
+  chart_version = "x.y.z"
+}
+```
+
+## Support
+
+For issues and support:
+1. Check existing issues
+2. Create a new issue with:
+   - Environment details
+   - Error messages
+   - Steps to reproduce
+
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
