@@ -70,34 +70,12 @@ variable "helm_values" {
   default     = {}
 }
 
-variable "chart_version" {
-  description = "Version of the Vault Helm chart"
-  type        = string
-  default     = "0.28.0"
-}
+
 
 variable "replicas" {
   description = "Number of Vault replicas"
   type        = number
   default     = 3
-}
-
-variable "storage_class" {
-  description = "Storage class for Vault data"
-  type        = string
-  default     = "gp3"
-}
-
-variable "storage_size" {
-  description = "Size of Vault data storage"
-  type        = string
-  default     = "50Gi"
-}
-
-variable "audit_storage_size" {
-  description = "Size of Vault audit storage"
-  type        = string
-  default     = "25Gi"
 }
 
 variable "kms_key_id" {
