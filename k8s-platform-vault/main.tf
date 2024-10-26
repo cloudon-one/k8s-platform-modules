@@ -1,5 +1,7 @@
+data "aws_region" "current" {}
 locals {
   namespace = var.namespace == "" ? "vault" : var.namespace
+  name      = var.name
   
   default_helm_values = {
     server = {
@@ -57,18 +59,38 @@ resource "kubernetes_namespace" "vault" {
     labels = merge(
       var.namespace_labels,
       {
-        "name" = local.namespace
+        name = local.namespace
       }
     )
   }
 }
 
+# Create service account
+resource "kubernetes_service_account" "vault" {
+  metadata {
+    name      = "${local.name}-sa"
+    namespace = local.namespace
+    annotations = merge(
+      {
+        "eks.amazonaws.com/role-arn" = var.iam_role_arn
+      },
+      var.service_account_annotations
+    )
+    labels = {
+      "app.kubernetes.io/name"       = local.name
+      "app.kubernetes.io/managed-by" = "terraform"
+    }
+  }
+
+  depends_on = [kubernetes_namespace.vault]
+}
+
 resource "helm_release" "vault" {
-  name       = var.release_name
+  name       = local.name
   repository = "https://helm.releases.hashicorp.com"
   chart      = "vault"
   version    = var.chart_version
-  namespace  = kubernetes_namespace.vault.metadata[0].name
+  namespace  = local.namespace
 
   values = [
     templatefile("${path.module}/templates/values.yaml", {
@@ -92,5 +114,8 @@ resource "helm_release" "vault" {
     })
   ]
 
-  depends_on = [kubernetes_namespace.vault]
+  depends_on = [
+    kubernetes_namespace.vault,
+    kubernetes_service_account.vault
+  ]
 }
