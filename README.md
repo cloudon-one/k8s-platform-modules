@@ -2,9 +2,7 @@
 # Kubernetes Platform Terraform Modules
 
 A collection of Terraform modules for deploying and managing a comprehensive Kubernetes platform with essential services and tools.
-A collection of Terraform modules for deploying and managing a comprehensive Kubernetes platform with essential services and tools.
 
-## 🚀 Platform Components
 ## 🚀 Platform Components
 
 ### Core Infrastructure
