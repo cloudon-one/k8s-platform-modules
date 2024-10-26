@@ -62,18 +62,19 @@ resource "helm_release" "atlantis" {
 
   values = [
     templatefile("${path.module}/templates/values.yaml", {
+      name                  = local.name
       image_tag             = var.image_tag
       service_account_name  = kubernetes_service_account.atlantis.metadata[0].name
-      resources             = var.resources
+      resources             = jsonencode(var.resources)
       aws_region            = data.aws_region.current.name
       ingress_enabled       = var.ingress_enabled
       ingress_host          = var.ingress_host
-      ingress_annotations   = var.ingress_annotations
+      ingress_annotations   = jsonencode(var.ingress_annotations)
       storage_class         = var.storage_class
       storage_size          = var.storage_size
       repo_config           = var.repo_config_json
       webhook_url           = var.webhook_url
-      org_whitelist         = var.org_whitelist
+      org_whitelist         = join(",", var.org_whitelist)
     })
   ]
 
