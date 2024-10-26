@@ -1,30 +1,11 @@
-output "service_account_role_arn" {
-  description = "ARN of the IAM role used by the Karpenter service account"
-  value       = aws_iam_role.karpenter_controller.arn
+output "event_rules" {
+  value = module.karpenter.event_rules
 }
 
-output "service_account_role_name" {
-  description = "Name of the IAM role used by the Karpenter service account"
-  value       = aws_iam_role.karpenter_controller.name
+output "iam_role_arn" {
+  value = module.karpenter.iam_role_arn 
 }
 
-output "service_account_policy_arn" {
-  description = "ARN of the IAM policy attached to the Karpenter role"
-  value       = aws_iam_policy.karpenter_controller.arn
+output "service_account" {
+  value = module.karpenter.service_account
 }
-
-output "namespace" {
-  description = "Kubernetes namespace where Karpenter is deployed"
-  value       = helm_release.karpenter.namespace
-}
-
-output "instance_profile_name" {
-  description = "Name of the IAM instance profile used for EKS nodes"
-  value       = local.instance_profile_name
-}
-
-output "instance_profile_arn" {
-  description = "ARN of the IAM instance profile used for EKS nodes"
-  value       = local.instance_profile_arn
-}
-
