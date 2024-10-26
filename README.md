@@ -247,7 +247,7 @@ k8s-platform-<component>/
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/your-org/k8s-platform-modules.git
+git clone https://github.com/cloudon-one/k8s-platform-modules.git
 ```
 
 2. Choose the modules you need and create your configuration:
