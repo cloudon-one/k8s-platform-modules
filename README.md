@@ -15,7 +15,6 @@ A collection of Terraform modules for deploying and managing a comprehensive Kub
 - **[Istio](./k8s-platform-istio)**: Service Mesh
 - **[Kong Gateway](./k8s-platform-kong-gw)**: API Gateway
 - **[Jaeger](./k8s-platform-jeager)**: Distributed Tracing
-- **[Vault](./k8s-platform-vault)**: Secrets management
 
 ### Observability & Monitoring
 - **[Loki Stack](./k8s-platform-loki-stack)**: Log Aggregation
