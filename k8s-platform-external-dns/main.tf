@@ -9,29 +9,29 @@ resource "helm_release" "external_dns" {
   values = [
     yamlencode({
       serviceAccount = {
-        create = true
-        name   = var.service_account_name
+        create      = true
+        name        = var.service_account_name
         annotations = var.service_account_annotations
       }
 
       provider = var.dns_provider
 
       aws = {
-        region     = var.aws_region
-        zoneType   = var.aws_zone_type
+        region   = var.aws_region
+        zoneType = var.aws_zone_type
         # If you're using cross-account access
         assumeRoleArn = var.aws_assume_role_arn
       }
 
-      domainFilters = var.domain_filters
+      domainFilters  = var.domain_filters
       excludeDomains = var.exclude_domains
-      zoneIdFilters = var.zone_id_filters
+      zoneIdFilters  = var.zone_id_filters
 
-      policy = var.sync_policy
+      policy   = var.sync_policy
       registry = var.registry_type
 
       txtOwnerId = var.txt_owner_id
-      txtPrefix = var.txt_prefix
+      txtPrefix  = var.txt_prefix
 
       interval = var.sync_interval
 
@@ -44,7 +44,7 @@ resource "helm_release" "external_dns" {
         }
       }
 
-      logLevel = var.log_level
+      logLevel  = var.log_level
       logFormat = var.log_format
 
       replicaCount = var.replica_count

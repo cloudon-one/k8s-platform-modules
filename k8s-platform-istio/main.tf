@@ -29,8 +29,8 @@ resource "helm_release" "istiod" {
   values = [
     yamlencode({
       global = {
-        hub                = var.hub
-        tag               = var.chart_version
+        hub = var.hub
+        tag = var.chart_version
         proxy = {
           resources = var.proxy_resources
         }
@@ -45,9 +45,9 @@ resource "helm_release" "istiod" {
       }
 
       meshConfig = {
-        enableTracing    = var.enable_tracing
-        accessLogFile    = var.access_log_file
-        enableAutoMtls   = var.enable_auto_mtls
+        enableTracing  = var.enable_tracing
+        accessLogFile  = var.access_log_file
+        enableAutoMtls = var.enable_auto_mtls
         defaultConfig = {
           holdApplicationUntilProxyStarts = true
         }
@@ -59,9 +59,9 @@ resource "helm_release" "istiod" {
           enabled = true
           prometheus = {
             configOverride = {
-              inboundSidecar = { disable_host_header_fallback = true }
+              inboundSidecar  = { disable_host_header_fallback = true }
               outboundSidecar = { disable_host_header_fallback = true }
-              gateway = { disable_host_header_fallback = true }
+              gateway         = { disable_host_header_fallback = true }
             }
           }
         }
@@ -84,24 +84,24 @@ resource "helm_release" "ingress_gateway" {
   values = [
     yamlencode({
       service = {
-        type = var.gateway_service_type
-        annotations = var.gateway_service_annotations
+        type           = var.gateway_service_type
+        annotations    = var.gateway_service_annotations
         loadBalancerIP = var.gateway_load_balancer_ip
-        ports = var.gateway_service_ports
+        ports          = var.gateway_service_ports
       }
 
       resources = var.gateway_resources
 
       autoscaling = {
-        enabled     = var.gateway_autoscaling_enabled
-        minReplicas = var.gateway_min_replicas
-        maxReplicas = var.gateway_max_replicas
+        enabled                        = var.gateway_autoscaling_enabled
+        minReplicas                    = var.gateway_min_replicas
+        maxReplicas                    = var.gateway_max_replicas
         targetCPUUtilizationPercentage = var.gateway_target_cpu_utilization
       }
 
       serviceAccount = {
-        create = true
-        name   = var.gateway_service_account_name
+        create      = true
+        name        = var.gateway_service_account_name
         annotations = var.gateway_service_account_annotations
       }
 
@@ -148,7 +148,7 @@ resource "kubectl_manifest" "default_gateway" {
           }
           hosts = var.default_gateway_hosts
           tls = {
-            mode = "SIMPLE"
+            mode           = "SIMPLE"
             credentialName = var.default_gateway_tls_secret
           }
         }

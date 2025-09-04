@@ -4,7 +4,7 @@ locals {
     var.tags,
     {
       "terraform-managed" = "true"
-      "component"        = "loki-stack"
+      "component"         = "loki-stack"
     }
   )
 }
@@ -30,7 +30,7 @@ resource "aws_s3_bucket" "loki" {
 resource "aws_s3_bucket_versioning" "loki" {
   count  = var.create_s3_bucket ? 1 : 0
   bucket = aws_s3_bucket.loki[0].id
-  
+
   versioning_configuration {
     status = "Enabled"
   }
@@ -142,18 +142,18 @@ resource "helm_release" "loki" {
 
   values = [
     templatefile("${path.module}/templates/values.yaml", {
-      s3_bucket_name      = var.s3_bucket_name
-      s3_region          = data.aws_region.current.name
-      retention_period   = var.retention_period
-      service_account    = kubernetes_service_account.loki.metadata[0].name
-      promtail_enabled   = var.promtail_enabled
-      grafana_enabled    = var.grafana_enabled
-      resources          = var.resources
-      storage_class_name = var.storage_class_name
-      storage_size       = var.storage_size
-      ingress_enabled    = var.ingress_enabled
-      ingress_host       = var.ingress_host
-      ingress_annotations = var.ingress_annotations
+      s3_bucket_name            = var.s3_bucket_name
+      s3_region                 = data.aws_region.current.name
+      retention_period          = var.retention_period
+      service_account           = kubernetes_service_account.loki.metadata[0].name
+      promtail_enabled          = var.promtail_enabled
+      grafana_enabled           = var.grafana_enabled
+      resources                 = var.resources
+      storage_class_name        = var.storage_class_name
+      storage_size              = var.storage_size
+      ingress_enabled           = var.ingress_enabled
+      ingress_host              = var.ingress_host
+      ingress_annotations       = var.ingress_annotations
       additional_scrape_configs = var.additional_scrape_configs
     })
   ]

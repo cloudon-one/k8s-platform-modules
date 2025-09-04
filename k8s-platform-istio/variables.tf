@@ -61,7 +61,7 @@ variable "pilot_autoscale_max" {
 variable "pilot_resources" {
   description = "Resource limits and requests for Istiod"
   type        = map(map(string))
-  default     = {
+  default = {
     requests = {
       cpu    = "500m"
       memory = "2Gi"
@@ -76,7 +76,7 @@ variable "pilot_resources" {
 variable "proxy_resources" {
   description = "Resource limits and requests for Istio proxy"
   type        = map(map(string))
-  default     = {
+  default = {
     requests = {
       cpu    = "100m"
       memory = "128Mi"
@@ -145,15 +145,15 @@ variable "gateway_load_balancer_ip" {
 variable "gateway_service_ports" {
   description = "Service ports for Ingress Gateway"
   type        = list(map(string))
-  default     = [
+  default = [
     {
-      name = "http2"
-      port = 80
+      name       = "http2"
+      port       = 80
       targetPort = 80
     },
     {
-      name = "https"
-      port = 443
+      name       = "https"
+      port       = 443
       targetPort = 443
     }
   ]
@@ -162,7 +162,7 @@ variable "gateway_service_ports" {
 variable "gateway_resources" {
   description = "Resource limits and requests for Ingress Gateway"
   type        = map(map(string))
-  default     = {
+  default = {
     requests = {
       cpu    = "100m"
       memory = "128Mi"

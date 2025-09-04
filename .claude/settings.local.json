@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(terraform fmt:*)",
+      "Bash(terraform:*)",
+      "Bash(mv:*)",
+      "Bash(for dir in k8s-platform-*/)",
+      "Bash(do if [ ! -f \"$dir/versions.tf\" ])",
+      "Bash(then echo \"Missing versions.tf in $dir\")",
+      "Bash(fi)",
+      "Bash(done)",
+      "Bash(chmod:*)",
+      "Bash(./security-validation.sh)",
+      "Bash(timeout:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

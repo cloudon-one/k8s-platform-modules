@@ -4,7 +4,7 @@ locals {
     var.tags,
     {
       "terraform-managed" = "true"
-      "component"        = "kubecost"
+      "component"         = "kubecost"
     }
   )
 }
@@ -58,7 +58,12 @@ resource "aws_iam_policy" "kubecost" {
       {
         Effect = "Allow"
         Action = [
-          "athena:*",
+          "athena:GetQueryExecution",
+          "athena:GetQueryResults",
+          "athena:StartQueryExecution",
+          "athena:StopQueryExecution",
+          "athena:GetWorkGroup",
+          "athena:ListQueryExecutions",
           "glue:GetDatabase",
           "glue:GetDatabases",
           "glue:GetTable",
@@ -124,19 +129,17 @@ resource "helm_release" "kubecost" {
 
   values = [
     templatefile("${path.module}/templates/values.yaml", {
-      aws_access_key_id     = var.aws_access_key_id
-      aws_secret_key        = var.aws_secret_key
-      cluster_name          = var.cluster_name
-      prometheus_enabled    = var.prometheus_enabled
-      grafana_enabled       = var.grafana_enabled
-      service_account_name  = kubernetes_service_account.kubecost.metadata[0].name
-      ingress_enabled       = var.ingress_enabled
-      ingress_host          = var.ingress_host
-      ingress_annotations   = var.ingress_annotations
-      s3_bucket_name        = var.s3_bucket_name
-      s3_region             = data.aws_region.current.name
-      kubecost_token        = var.kubecost_token
-      resources             = var.resources
+      cluster_name         = var.cluster_name
+      prometheus_enabled   = var.prometheus_enabled
+      grafana_enabled      = var.grafana_enabled
+      service_account_name = kubernetes_service_account.kubecost.metadata[0].name
+      ingress_enabled      = var.ingress_enabled
+      ingress_host         = var.ingress_host
+      ingress_annotations  = var.ingress_annotations
+      s3_bucket_name       = var.s3_bucket_name
+      s3_region            = data.aws_region.current.name
+      use_irsa             = var.create_iam_resources
+      resources            = var.resources
     })
   ]
 

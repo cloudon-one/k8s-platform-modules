@@ -18,26 +18,26 @@ module "loki_stack" {
   cluster_name          = "my-eks-cluster"
   cluster_oidc_provider = "oidc.eks.us-west-2.amazonaws.com/id/EXAMPLE1234567890"
   s3_bucket_name        = "my-loki-logs"
-  
+
   # Optional configurations
-  namespace          = "logging"
-  retention_period   = "336h" # 14 days
-  promtail_enabled   = true
-  grafana_enabled    = true
-  
+  namespace        = "logging"
+  retention_period = "336h" # 14 days
+  promtail_enabled = true
+  grafana_enabled  = true
+
   # Storage configuration
   storage_class_name = "gp3"
   storage_size       = "50Gi"
-  
+
   # Ingress configuration
   ingress_enabled = true
   ingress_host    = "logs.example.com"
   ingress_annotations = {
-    "kubernetes.io/ingress.class"               = "nginx"
+    "kubernetes.io/ingress.class"              = "nginx"
     "cert-manager.io/cluster-issuer"           = "letsencrypt"
     "nginx.ingress.kubernetes.io/ssl-redirect" = "true"
   }
-  
+
   # Resource configuration
   resources = {
     loki = {

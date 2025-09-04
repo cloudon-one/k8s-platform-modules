@@ -32,7 +32,7 @@ output "grafana_dashboard" {
 
 output "configured_repositories" {
   description = "List of configured repository names"
-  value       = [
+  value = [
     for repo in var.repositories : repo.name
     if lookup(kubernetes_secret.repo_credentials, repo.name, null) != null
   ]
@@ -49,14 +49,14 @@ output "repository_secrets" {
 
 output "github_app_configs" {
   description = "List of configured GitHub App IDs"
-  value       = [
+  value = [
     for app in var.github_apps : app.id
   ]
 }
 
 output "certificate_configs" {
   description = "List of configured repository certificate server names"
-  value       = [
+  value = [
     for cert in var.repositories_cert : cert.server_name
   ]
 }

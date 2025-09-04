@@ -19,6 +19,18 @@ variable "argocd_version" {
   type        = string
 }
 
+variable "argocd_s3_bucket" {
+  description = "S3 bucket name for ArgoCD application manifests"
+  type        = string
+  default     = ""
+}
+
+variable "enable_network_policies" {
+  description = "Enable network policies for enhanced pod-to-pod security"
+  type        = bool
+  default     = true
+}
+
 variable "admin_password" {
   description = "Initial admin password for ArgoCD"
   type        = string
@@ -73,13 +85,13 @@ variable "repositories" {
     url  = string
     path = string
     credentials = optional(object({
-      username     = optional(string)
-      password     = optional(string)
-      ssh_private_key = optional(string)
-      tls_client_cert = optional(string)
+      username            = optional(string)
+      password            = optional(string)
+      ssh_private_key     = optional(string)
+      tls_client_cert     = optional(string)
       tls_client_cert_key = optional(string)
     }))
-    type = optional(string, "git")
+    type     = optional(string, "git")
     insecure = optional(bool, false)
   }))
   default = []
@@ -88,9 +100,9 @@ variable "repositories" {
 variable "github_apps" {
   description = "GitHub App configurations for repository access"
   type = list(object({
-    id         = string
+    id              = string
     installation_id = string
-    private_key = string
+    private_key     = string
   }))
   default = []
 }

@@ -1,7 +1,7 @@
 resource "kubernetes_namespace" "argocd" {
   metadata {
     name = var.namespace
-    
+
     labels = {
       "app.kubernetes.io/managed-by" = "terraform"
       environment                    = var.environment
@@ -33,12 +33,12 @@ resource "helm_release" "argocd" {
             bitbucket.org ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAubiN81eDcafrgMeLzaFPsw2kNvEcqTKl/VqLat/MaB33pZy0y3rJZtnqwR2qOOvbwKZYKiEO1O6VqNEBxKvJJelCq0dTXWT5pbO2gDXC6h6QDXCaHo6pOHGPUy+YBaGQRGuSusMEASYiWunYN0vCAI8QaXnWMXNMdFP3jHAJH0eDsoiGnLPBlBp4TNm6rYI74nMzgz3B9IikW4WVK+dc8KZJZWYjAuORU3jc1c/NPskD2ASinf8v3xnfXeukU0sJ5N6m5E8VLjObPEO+mN2t/FZTMZLiFqPWc/ALSqnMnnhwrNi2rbfg/rd/IpL8Le3pSBne8+seeFVBoGqzHM9yXw==
           EOT
         }
-        credentialTemplates = {}  # Will be populated by credentials
+        credentialTemplates = {} # Will be populated by credentials
       }
       repoServer = {
         volumes = [
           {
-            name = "custom-tools"
+            name     = "custom-tools"
             emptyDir = {}
           }
         ]
@@ -121,7 +121,8 @@ resource "aws_iam_role_policy" "argocd" {
           "s3:ListBucket"
         ]
         Resource = [
-          "arn:aws:s3:::*"
+          "arn:aws:s3:::${var.argocd_s3_bucket}",
+          "arn:aws:s3:::${var.argocd_s3_bucket}/*"
         ]
       }
     ]
@@ -140,7 +141,7 @@ resource "kubernetes_manifest" "git_repository" {
       namespace = kubernetes_namespace.argocd.metadata[0].name
     }
     spec = {
-      url = each.value.url
+      url  = each.value.url
       path = each.value.path
       type = "git"
     }
@@ -285,7 +286,7 @@ resource "kubernetes_secret" "alertmanager_config" {
         resolve_timeout = "5m"
       }
       route = {
-        group_by = ["job", "severity"]
+        group_by        = ["job", "severity"]
         group_wait      = "30s"
         group_interval  = "5m"
         repeat_interval = "12h"
@@ -304,9 +305,9 @@ resource "kubernetes_secret" "alertmanager_config" {
         var.alert_email_to != "" ? [{
           name = "argocd-notifications"
           email_configs = [{
-            to = var.alert_email_to
-            from = "argocd-alerts@${var.environment}.local"
-            smarthost = "smtp.example.com:587"
+            to          = var.alert_email_to
+            from        = "argocd-alerts@${var.environment}.local"
+            smarthost   = "smtp.example.com:587"
             require_tls = true
           }]
         }] : []
@@ -330,14 +331,14 @@ resource "kubernetes_secret" "repo_credentials" {
   }
 
   data = {
-    url = each.value.url
-    type = each.value.type
+    url      = each.value.url
+    type     = each.value.type
     insecure = each.value.insecure ? "true" : "false"
     # Add credentials based on what's provided
-    username = try(each.value.credentials.username, null) != null ? each.value.credentials.username : null
-    password = try(each.value.credentials.password, null) != null ? each.value.credentials.password : null
-    sshPrivateKey = try(each.value.credentials.ssh_private_key, null) != null ? each.value.credentials.ssh_private_key : null
-    tlsClientCert = try(each.value.credentials.tls_client_cert, null) != null ? each.value.credentials.tls_client_cert : null
+    username         = try(each.value.credentials.username, null) != null ? each.value.credentials.username : null
+    password         = try(each.value.credentials.password, null) != null ? each.value.credentials.password : null
+    sshPrivateKey    = try(each.value.credentials.ssh_private_key, null) != null ? each.value.credentials.ssh_private_key : null
+    tlsClientCert    = try(each.value.credentials.tls_client_cert, null) != null ? each.value.credentials.tls_client_cert : null
     tlsClientCertKey = try(each.value.credentials.tls_client_cert_key, null) != null ? each.value.credentials.tls_client_cert_key : null
   }
 }
@@ -357,9 +358,9 @@ resource "kubernetes_secret" "github_app_credentials" {
   }
 
   data = {
-    id              = each.value.id
-    installationID  = each.value.installation_id
-    privateKey      = each.value.private_key
+    id             = each.value.id
+    installationID = each.value.installation_id
+    privateKey     = each.value.private_key
   }
 }
 
@@ -380,4 +381,17 @@ resource "kubernetes_secret" "repo_certs" {
   data = {
     "cert-${each.key}" = each.value.cert_data
   }
+}
+
+# Deploy network policies for enhanced security
+resource "kubernetes_manifest" "argocd_network_policies" {
+  count = var.enable_network_policies ? 1 : 0
+
+  for_each = toset(split("---", templatefile("${path.module}/templates/network-policy.yaml", {
+    namespace = var.namespace
+  })))
+
+  manifest = yamldecode(each.value)
+
+  depends_on = [helm_release.argocd]
 }

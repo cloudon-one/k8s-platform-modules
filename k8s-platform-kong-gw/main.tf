@@ -4,7 +4,7 @@ locals {
     var.tags,
     {
       "terraform-managed" = "true"
-      "component"        = "kong-gateway"
+      "component"         = "kong-gateway"
     }
   )
 }
@@ -65,33 +65,33 @@ resource "aws_security_group" "database" {
 }
 
 resource "aws_security_group_rule" "database_ingress" {
-  count             = var.create_database ? 1 : 0
-  type              = "ingress"
-  from_port         = 5432
-  to_port           = 5432
-  protocol          = "tcp"
-  security_group_id = aws_security_group.database[0].id
+  count                    = var.create_database ? 1 : 0
+  type                     = "ingress"
+  from_port                = 5432
+  to_port                  = 5432
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.database[0].id
   source_security_group_id = aws_security_group.kong.id
 }
 
 resource "aws_db_instance" "kong" {
-  count                  = var.create_database ? 1 : 0
-  identifier_prefix      = "${local.name}-"
-  engine                 = "postgres"
-  engine_version         = var.postgres_engine_version
-  instance_class         = var.database_instance_class
-  allocated_storage      = var.database_allocated_storage
-  
-  db_name               = "kong"
-  username             = var.database_username
-  password             = var.database_password
-  
+  count             = var.create_database ? 1 : 0
+  identifier_prefix = "${local.name}-"
+  engine            = "postgres"
+  engine_version    = var.postgres_engine_version
+  instance_class    = var.database_instance_class
+  allocated_storage = var.database_allocated_storage
+
+  db_name  = "kong"
+  username = var.database_username
+  password = var.database_password
+
   vpc_security_group_ids = [aws_security_group.database[0].id]
   db_subnet_group_name   = aws_db_subnet_group.kong[0].name
-  
+
   backup_retention_period = var.database_backup_retention_days
-  multi_az               = var.database_multi_az
-  skip_final_snapshot    = true
+  multi_az                = var.database_multi_az
+  skip_final_snapshot     = true
 
   tags = local.tags
 }

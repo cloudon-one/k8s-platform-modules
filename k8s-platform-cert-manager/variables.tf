@@ -43,7 +43,7 @@ variable "service_account_annotations" {
 variable "resources" {
   description = "Resource limits and requests for cert-manager"
   type        = map(map(string))
-  default     = {
+  default = {
     limits = {
       cpu    = "100m"
       memory = "128Mi"
@@ -103,7 +103,7 @@ variable "acme_server" {
 variable "acme_email" {
   description = "Email address for ACME registration"
   type        = string
-  default = "paltform@cloudon.work"
+  default     = "paltform@cloudon.work"
 }
 
 variable "dns_challenge_enabled" {
