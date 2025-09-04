@@ -1,7 +1,15 @@
 # Random password for RDS
 resource "random_password" "db_password" {
-  length  = 16
-  special = true
+  length           = 32
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+# Random auth token for Redis
+resource "random_password" "redis_auth" {
+  length           = 32
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 
 # Security group for Airflow components
@@ -9,11 +17,31 @@ resource "aws_security_group" "airflow" {
   name_prefix = "airflow-${var.environment}-"
   vpc_id      = var.vpc_id
 
+  # HTTPS outbound for package downloads and API calls
   egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
+    description = "HTTPS outbound"
+  }
+
+  # HTTP outbound for package downloads
+  egress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "HTTP outbound"
+  }
+
+  # DNS resolution
+  egress {
+    from_port   = 53
+    to_port     = 53
+    protocol    = "udp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "DNS resolution"
   }
 
   tags = {
@@ -63,17 +91,21 @@ resource "aws_db_instance" "airflow_metadata" {
   engine_version    = "13.7"
   instance_class    = "db.t3.medium"
   allocated_storage = 20
-  
+
   db_name  = "airflow"
   username = "airflow"
   password = random_password.db_password.result
-  
+
   vpc_security_group_ids = [aws_security_group.rds.id]
   db_subnet_group_name   = aws_db_subnet_group.airflow.name
-  
-  backup_retention_period = 7
-  skip_final_snapshot    = true
-  
+
+  backup_retention_period    = 7
+  skip_final_snapshot        = true
+  storage_encrypted          = true
+  deletion_protection        = var.enable_deletion_protection
+  multi_az                   = var.multi_az
+  auto_minor_version_upgrade = false
+
   tags = {
     Environment = var.environment
     Name        = "airflow-metadata-db"
@@ -104,15 +136,26 @@ resource "aws_elasticache_subnet_group" "airflow" {
 
 # Redis for Celery backend
 resource "aws_elasticache_cluster" "airflow_celery" {
-  cluster_id           = "airflow-${var.environment}-redis"
-  engine              = "redis"
-  node_type           = "cache.t3.micro"
-  num_cache_nodes     = 1
-  port                = 6379
-  
-  subnet_group_name    = aws_elasticache_subnet_group.airflow.name
-  security_group_ids   = [aws_security_group.redis.id]
-  
+  cluster_id      = "airflow-${var.environment}-redis"
+  engine          = "redis"
+  engine_version  = "7.0"
+  node_type       = "cache.t3.micro"
+  num_cache_nodes = 1
+  port            = 6379
+
+  # Security configurations
+  at_rest_encryption_enabled = true
+  transit_encryption_enabled = true
+  auth_token                 = random_password.redis_auth.result
+
+  subnet_group_name  = aws_elasticache_subnet_group.airflow.name
+  security_group_ids = [aws_security_group.redis.id]
+
+  # Maintenance and backup
+  maintenance_window       = "sun:05:00-sun:09:00"
+  snapshot_retention_limit = 5
+  snapshot_window          = "03:00-05:00"
+
   tags = {
     Environment = var.environment
     Name        = "airflow-redis"
@@ -122,7 +165,7 @@ resource "aws_elasticache_cluster" "airflow_celery" {
 # S3 bucket for logs and DAGs
 resource "aws_s3_bucket" "airflow" {
   bucket = "airflow-${var.environment}-${data.aws_caller_identity.current.account_id}"
-  
+
   tags = {
     Environment = var.environment
     Name        = "airflow-storage"
@@ -134,6 +177,28 @@ resource "aws_s3_bucket_versioning" "airflow" {
   versioning_configuration {
     status = "Enabled"
   }
+}
+
+# S3 bucket encryption
+resource "aws_s3_bucket_server_side_encryption_configuration" "airflow" {
+  bucket = aws_s3_bucket.airflow.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+    bucket_key_enabled = true
+  }
+}
+
+# S3 bucket public access block
+resource "aws_s3_bucket_public_access_block" "airflow" {
+  bucket = aws_s3_bucket.airflow.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
 # EKS node group for Airflow

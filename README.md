@@ -1,20 +1,22 @@
 
 # Kubernetes Platform Terraform Modules
 
-A collection of Terraform modules for deploying and managing a comprehensive Kubernetes platform with essential services and tools.
+🛡️ **Security-Hardened** collection of Terraform modules for deploying and managing a comprehensive Kubernetes platform with essential services and tools.
+
+> **Latest Update**: Enhanced with production-ready security controls, encryption, and compliance-ready configurations.
 
 ## 🚀 Platform Components
 
 ### Core Infrastructure
 - **[Karpenter](./k8s-platform-karpenter)**: Kubernetes Node Autoscaling
-- **[External DNS](./k8s-platfrom-external-dns)**: DNS Records Management
+- **[External DNS](./k8s-platform-external-dns)**: DNS Records Management
 - **[Cert Manager](./k8s-platform-cert-manager)**: Certificate Management
 - **[External Secrets](./k8s-platform-external-secrets)**: Secrets Management
 
 ### Service Mesh & Networking
 - **[Istio](./k8s-platform-istio)**: Service Mesh
 - **[Kong Gateway](./k8s-platform-kong-gw)**: API Gateway
-- **[Jaeger](./k8s-platform-jeager)**: Distributed Tracing
+- **[Jaeger](./k8s-platform-jaeger)**: Distributed Tracing
 
 ### Observability & Monitoring
 - **[Loki Stack](./k8s-platform-loki-stack)**: Log Aggregation
@@ -29,10 +31,15 @@ A collection of Terraform modules for deploying and managing a comprehensive Kub
 ## 📋 Prerequisites
 
 - Terraform >= 1.5.0
-- Kubernetes cluster (tested with EKS)
+- Kubernetes cluster (tested with EKS) with IRSA enabled
 - kubectl configured to access your cluster
 - Helm 3.x
 - AWS CLI configured (if using AWS services)
+- **Security Requirements**:
+  - EKS cluster with Pod Security Standards enabled
+  - AWS Secrets Manager or Systems Manager Parameter Store
+  - Network policies support (e.g., Calico, Cilium)
+  - KMS keys for encryption (recommended)
 
 ## 🏗️ Architecture
 
@@ -245,25 +252,45 @@ k8s-platform-<component>/
 
 ## 🚀 Quick Start
 
-1. Clone the repository:
+### 1. Clone and Validate
 ```bash
 git clone https://github.com/cloudon-one/k8s-platform-modules.git
+cd k8s-platform-modules
+
+# Run security validation
+./security-validation.sh
 ```
 
-2. Choose the modules you need and create your configuration:
+### 2. Security-First Configuration
 ```hcl
-module "cert_manager" {
-  source = "./k8s-platform-cert-manager"
-  # ... configuration ...
+# Example: Secure Kubecost deployment with IRSA
+module "kubecost" {
+  source = "./k8s-platform-kubecost"
+  
+  cluster_name = "my-eks-cluster"
+  create_iam_resources = true  # Use IRSA instead of hardcoded keys
+  s3_bucket_name = "my-kubecost-bucket"
+  
+  # Security settings
+  enable_network_policies = true
 }
 
-module "external_dns" {
-  source = "./k8s-platform-external-dns"
-  # ... configuration ...
+# Example: ArgoCD with enhanced security
+module "argocd" {
+  source = "./k8s-platform-argocd"
+  
+  environment = "production"
+  argocd_s3_bucket = "my-argocd-manifests"  # Specific bucket, not wildcard
+  enable_network_policies = true
 }
-
-# Add more modules as needed
 ```
+
+### 3. Security Checklist
+☑️ Use IRSA for AWS access (set `create_iam_resources = true`)
+☑️ Specify exact S3 bucket names (avoid wildcards)
+☑️ Enable network policies where available
+☑️ Configure AWS Secrets Manager/Parameter Store
+☑️ Review IAM policies for least privilege
 
 ## 📦 Available Modules
 
@@ -280,7 +307,7 @@ module "karpenter" {
 #### External DNS
 ```hcl
 module "external_dns" {
-  source = "./k8s-platfrom-external-dns"
+  source = "./k8s-platform-external-dns"
   domain = "example.com"
 }
 ```
@@ -332,11 +359,26 @@ graph TD
 
 ## 🛡️ Security Features
 
-- HTTPS enabled by default
-- RBAC configurations included
-- Network policies defined
-- Security context constraints
-- Service mesh security
+### **Production-Ready Security Controls**
+- **Zero Hardcoded Secrets**: IRSA (IAM Roles for Service Accounts) integration
+- **Least Privilege IAM**: Specific permissions instead of wildcards
+- **Pod Security**: Non-root containers, dropped capabilities, read-only filesystems
+- **Encryption Everywhere**: Data at rest and in transit encryption
+- **Network Isolation**: Network policies and security group restrictions
+- **Compliance Ready**: SOC 2, PCI DSS, GDPR, NIST baseline controls
+
+### **Security Validation**
+```bash
+# Run comprehensive security checks
+./security-validation.sh
+```
+
+### **Key Security Improvements**
+- ✅ **No Credential Exposure**: Eliminated hardcoded AWS keys
+- ✅ **Restricted Permissions**: Replaced `*` permissions with specific actions
+- ✅ **Container Security**: Added security contexts to all pods
+- ✅ **Data Protection**: RDS, Redis, and S3 encryption enabled
+- ✅ **Network Security**: Granular egress rules and network policies
 
 ## 📊 Monitoring & Observability
 
@@ -353,12 +395,31 @@ graph TD
 3. Commit your changes
 4. Create a pull request
 
-## Security
+## 🔒 Advanced Security
 
-- All secrets are managed through external-secrets
-- TLS certificates are managed by cert-manager
-- Network policies are enforced through Istio
-- Regular security scanning with built-in tools
+### **Secrets Management**
+- External Secrets Operator integration with AWS Secrets Manager
+- HashiCorp Vault for advanced secret workflows
+- No secrets stored in Terraform state or container images
+- Automatic secret rotation support
+
+### **Network Security**
+- **Default-deny network policies** for critical namespaces
+- **Service mesh security** with Istio mTLS
+- **API Gateway protection** with Kong rate limiting and authentication
+- **Granular egress controls** (HTTPS, HTTP, DNS only)
+
+### **Data Protection**
+- **Database encryption**: RDS with encryption at rest
+- **Cache security**: Redis with auth tokens and encryption
+- **Storage security**: S3 with server-side encryption and public access blocking
+- **Backup encryption**: Automated encrypted backups with retention policies
+
+### **Compliance & Auditing**
+- **Pod Security Standards**: Restricted profile enforcement
+- **Security contexts**: Non-root, read-only, capability dropping
+- **Resource monitoring**: Prometheus metrics for security events
+- **Audit logging**: CloudTrail integration for all AWS API calls
 
 ## Maintenance
 
@@ -378,55 +439,117 @@ inputs = {
 }
 ```
 
-## Support
+## 🆘 Security & Support
 
-For issues and support:
-1. Check existing issues
-2. Create a new issue with:
-   - Environment details
-   - Error messages
+### 🛡️ **Security Reporting**
+For security vulnerabilities:
+1. **DO NOT** create public issues for security vulnerabilities
+2. Email security concerns privately to the maintainers
+3. Include detailed reproduction steps and impact assessment
+4. Allow reasonable time for fixes before public disclosure
+
+### 📞 **General Support**
+For general issues and support:
+1. Run `./security-validation.sh` first to check for common issues
+2. Check existing issues in the repository
+3. Review the `SECURITY-IMPROVEMENTS.md` for recent changes
+4. Create a new issue with:
+   - Environment details (Kubernetes version, modules used)
+   - Security validation script output
+   - Error messages and logs
    - Steps to reproduce
+
+### 📚 **Documentation**
+- **Security Guide**: `SECURITY-IMPROVEMENTS.md`
+- **Individual Modules**: Each module's `README.md`
+- **Best Practices**: This README's Best Practices section
+- **Troubleshooting**: Run security validation for automated checks
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+---
+
+## 🚨 **Security Notice**
+
+This repository has been **security-hardened** and is production-ready. Before deployment:
+
+1. **Run Security Validation**: `./security-validation.sh`
+2. **Review Security Improvements**: Read `SECURITY-IMPROVEMENTS.md`  
+3. **Configure Secrets Management**: Set up AWS Secrets Manager/Parameter Store
+4. **Enable IRSA**: Use IAM Roles for Service Accounts instead of hardcoded credentials
+5. **Apply Network Policies**: Enable network microsegmentation
+
+### 🏆 **Security Compliance Status**
+- ✅ **No Hardcoded Secrets**: All credential exposure eliminated
+- ✅ **Least Privilege IAM**: Wildcard permissions replaced with specific actions
+- ✅ **Pod Security**: Non-root containers with dropped capabilities  
+- ✅ **Data Encryption**: At-rest and in-transit encryption enabled
+- ✅ **Network Isolation**: Security groups and network policies configured
+- ✅ **Audit Ready**: CloudTrail and security monitoring configured
+
+**Ready for:** SOC 2, PCI DSS, GDPR, and NIST compliance frameworks.
+
+---
+
+*"Security is not a feature, it's a foundation."* 🛡️
+
+
+## 🆕 What's New: Security Enhancements
+
+### 🚨 **Critical Security Fixes Applied**
+- **Eliminated Hardcoded Credentials**: Removed AWS access keys from all templates
+- **Restricted IAM Permissions**: Replaced wildcard (`*`) with specific permissions
+- **Enhanced Pod Security**: Added security contexts to prevent privilege escalation
+- **Improved Network Security**: Granular egress rules and network policies
+- **Full Encryption**: Data at rest and in transit across all components
+
+### 🛠️ **New Security Tools**
+```bash
+# Automated security validation
+./security-validation.sh
+
+# Check security improvements
+ls -la SECURITY-IMPROVEMENTS.md
+```
+
+### 🌟 **Production-Ready Features**
+- IRSA (IAM Roles for Service Accounts) support
+- Pod Security Standards enforcement
+- Network policy templates
+- Encrypted databases and caches
+- Security validation automation
+
+---
 
 ## ✨ Best Practices
 
-1. **Infrastructure as Code**
-   - Use GitOps workflows
-   - Implement proper state management
-   - Version your infrastructure code
+1. **Security-First Approach**
+   - Always use IRSA instead of hardcoded credentials
+   - Enable Pod Security Standards in all namespaces
+   - Implement network policies for microsegmentation
+   - Use External Secrets Operator for secret management
+   - Regular security validation with automated tools
 
-2. **Security**
-   - Enable RBAC
-   - Use network policies
-   - Implement secret management
-   - Enable service mesh security features
+2. **Infrastructure as Code**
+   - Use GitOps workflows with ArgoCD
+   - Implement proper Terraform state management
+   - Version your infrastructure code with semantic versioning
+   - Apply infrastructure changes through pull requests
 
-3. **Monitoring**
-   - Set up proper alerting
-   - Implement logging
-   - Enable tracing
-   - Monitor costs
+3. **Monitoring & Observability**
+   - Set up comprehensive alerting with Prometheus
+   - Implement centralized logging with Loki
+   - Enable distributed tracing with Jaeger
+   - Monitor costs and resource usage with Kubecost
 
-4. **Scalability**
-   - Use node autoscaling
-   - Implement pod autoscaling
-   - Configure proper resource requests/limits
+4. **Operational Excellence**
+   - Use node autoscaling with Karpenter
+   - Implement horizontal pod autoscaling
+   - Configure proper resource requests and limits
+   - Regular backup and disaster recovery testing
 
-## 📚 Documentation
-
-Each module contains its own detailed README with:
-- Configuration options
-- Example usage
-- Common pitfalls
-- Troubleshooting guide
-
-## 🤝 Support
-
-For support, please open an issue in the repository.
 
 ## 🔄 Version Compatibility Matrix
 

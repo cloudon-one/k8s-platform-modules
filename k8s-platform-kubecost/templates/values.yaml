@@ -16,8 +16,10 @@ global:
 
 kubecostProductConfigs:
   clusterName: ${cluster_name}
+  %{ if kubecost_token != "" }
   productKey:
     key: ${kubecost_token}
+  %{ endif }
 
 serviceAccount:
   create: false
@@ -43,6 +45,7 @@ prometheus:
       enabled: true
       size: 32Gi
 
+%{ if s3_bucket_name != "" }
 thanos:
   store:
     enabled: true
@@ -50,8 +53,13 @@ thanos:
     s3:
       bucket: ${s3_bucket_name}
       region: ${s3_region}
-      access_key: ${aws_access_key_id}
-      secret_key: ${aws_secret_key}
+      %{ if use_irsa }
+      # Using IRSA - no hardcoded credentials needed
+      %{ else }
+      # WARNING: Using hardcoded credentials - not recommended for production
+      # Consider using IRSA (IAM Roles for Service Accounts) instead
+      %{ endif }
+%{ endif }
 
 resources:
   requests:

@@ -55,7 +55,7 @@ variable "enable_cert_controller" {
 variable "resources" {
   description = "Resource limits and requests for the controller"
   type        = map(map(string))
-  default     = {
+  default = {
     limits = {
       cpu    = "100m"
       memory = "128Mi"
@@ -115,13 +115,23 @@ variable "enable_parameter_store" {
 variable "secrets_manager_arns" {
   description = "List of Secrets Manager ARNs to grant access to"
   type        = list(string)
-  default     = ["arn:aws:secretsmanager:*:*:secret:*"]
+  default     = []
+
+  validation {
+    condition     = length(var.secrets_manager_arns) == 0 || !contains([for arn in var.secrets_manager_arns : can(regex(".*:\\*:.*:\\*:.*", arn))], true)
+    error_message = "Wildcard ARNs (containing *:*) are not recommended for production. Specify exact resource ARNs."
+  }
 }
 
 variable "parameter_store_arns" {
   description = "List of Parameter Store ARNs to grant access to"
   type        = list(string)
-  default     = ["arn:aws:ssm:*:*:parameter/*"]
+  default     = []
+
+  validation {
+    condition     = length(var.parameter_store_arns) == 0 || !contains([for arn in var.parameter_store_arns : can(regex(".*:\\*:.*:\\*:.*", arn))], true)
+    error_message = "Wildcard ARNs (containing *:*) are not recommended for production. Specify exact resource ARNs."
+  }
 }
 
 variable "tags" {

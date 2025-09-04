@@ -9,10 +9,10 @@ resource "helm_release" "cert_manager" {
   values = [
     yamlencode({
       installCRDs = var.install_crds
-      
+
       serviceAccount = {
-        create = true
-        name   = var.service_account_name
+        create      = true
+        name        = var.service_account_name
         annotations = var.service_account_annotations
       }
 
@@ -31,8 +31,8 @@ resource "helm_release" "cert_manager" {
       }
 
       webhook = {
-        enabled = var.enable_webhook
-        securePort = 10250
+        enabled     = var.enable_webhook
+        securePort  = 10250
         hostNetwork = false
       }
 
@@ -75,7 +75,7 @@ resource "kubernetes_manifest" "cluster_issuer" {
               }
             }
           }
-        ] : [
+          ] : [
           {
             http01 = {
               ingress = {

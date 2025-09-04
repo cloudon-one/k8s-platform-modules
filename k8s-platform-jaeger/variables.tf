@@ -37,7 +37,7 @@ variable "operator_service_account_annotations" {
 variable "operator_resources" {
   description = "Resources for Jaeger operator"
   type        = map(map(string))
-  default     = {
+  default = {
     limits = {
       cpu    = "200m"
       memory = "256Mi"
@@ -94,7 +94,7 @@ variable "elasticsearch_node_count" {
 variable "elasticsearch_resources" {
   description = "Resources for Elasticsearch"
   type        = map(map(string))
-  default     = {
+  default = {
     requests = {
       cpu    = "1"
       memory = "2Gi"
@@ -151,7 +151,7 @@ variable "query_replicas" {
 variable "query_resources" {
   description = "Resources for query component"
   type        = map(map(string))
-  default     = {
+  default = {
     limits = {
       cpu    = "500m"
       memory = "512Mi"
@@ -184,7 +184,7 @@ variable "collector_replicas" {
 variable "collector_resources" {
   description = "Resources for collector component"
   type        = map(map(string))
-  default     = {
+  default = {
     limits = {
       cpu    = "1"
       memory = "1Gi"
@@ -217,7 +217,7 @@ variable "agent_strategy" {
 variable "agent_resources" {
   description = "Resources for agent component"
   type        = map(map(string))
-  default     = {
+  default = {
     limits = {
       cpu    = "200m"
       memory = "256Mi"
@@ -244,9 +244,9 @@ variable "ui_options" {
 variable "sampling_config" {
   description = "Sampling configuration"
   type        = map(any)
-  default     = {
+  default = {
     default_strategy = {
-      type = "probabilistic"
+      type  = "probabilistic"
       param = 1
     }
   }
@@ -279,7 +279,7 @@ variable "otel_collector_replicas" {
 variable "otel_collector_resources" {
   description = "Resources for OpenTelemetry Collector"
   type        = map(map(string))
-  default     = {
+  default = {
     limits = {
       cpu    = "500m"
       memory = "512Mi"

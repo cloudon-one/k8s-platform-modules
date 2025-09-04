@@ -3,7 +3,7 @@ output "event_rules" {
 }
 
 output "iam_role_arn" {
-  value = module.eks_karpenter.iam_role_arn 
+  value = module.eks_karpenter.iam_role_arn
 }
 
 output "service_account" {

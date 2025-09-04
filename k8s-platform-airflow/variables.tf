@@ -29,3 +29,15 @@ variable "eks_cluster_name" {
   description = "Name of the EKS cluster"
   type        = string
 }
+
+variable "enable_deletion_protection" {
+  description = "Enable deletion protection for RDS instance"
+  type        = bool
+  default     = true
+}
+
+variable "multi_az" {
+  description = "Enable Multi-AZ for RDS instance"
+  type        = bool
+  default     = false
+}

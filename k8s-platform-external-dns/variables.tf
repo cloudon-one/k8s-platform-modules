@@ -109,7 +109,7 @@ variable "sync_interval" {
 variable "resources" {
   description = "Resource limits and requests for external-dns"
   type        = map(map(string))
-  default     = {
+  default = {
     limits = {
       cpu    = "100m"
       memory = "128Mi"

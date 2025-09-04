@@ -32,17 +32,29 @@ variable "chart_version" {
   default     = "2.42.2"
 }
 
+# DEPRECATED: Use IRSA instead of hardcoded credentials
+# These variables are kept for backward compatibility but should not be used
 variable "aws_access_key_id" {
-  description = "AWS access key ID for Kubecost"
+  description = "DEPRECATED: AWS access key ID - Use IRSA instead"
   type        = string
   default     = ""
+
+  validation {
+    condition     = var.aws_access_key_id == ""
+    error_message = "Hardcoded AWS credentials are not recommended. Use IRSA by setting create_iam_resources = true."
+  }
 }
 
 variable "aws_secret_key" {
-  description = "AWS secret key for Kubecost"
+  description = "DEPRECATED: AWS secret key - Use IRSA instead"
   type        = string
   default     = ""
   sensitive   = true
+
+  validation {
+    condition     = var.aws_secret_key == ""
+    error_message = "Hardcoded AWS credentials are not recommended. Use IRSA by setting create_iam_resources = true."
+  }
 }
 
 variable "prometheus_enabled" {
@@ -78,6 +90,7 @@ variable "ingress_annotations" {
 variable "s3_bucket_name" {
   description = "S3 bucket name for cost reports"
   type        = string
+  default     = ""
 }
 
 variable "kubecost_token" {

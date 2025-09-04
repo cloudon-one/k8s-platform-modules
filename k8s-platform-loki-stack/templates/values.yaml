@@ -4,6 +4,22 @@ loki:
     create: true
     name: ${service_account}
   
+  # Security contexts for enhanced security
+  securityContext:
+    fsGroup: 10001
+    runAsGroup: 10001
+    runAsUser: 10001
+    runAsNonRoot: true
+  
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 10001
+    capabilities:
+      drop:
+        - ALL
+  
   persistence:
     enabled: true
     storageClassName: ${storage_class_name}

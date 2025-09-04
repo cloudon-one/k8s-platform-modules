@@ -14,8 +14,8 @@ resource "helm_release" "jaeger_operator" {
         clusterRole = true
       }
       serviceAccount = {
-        create = true
-        name   = var.operator_service_account_name
+        create      = true
+        name        = var.operator_service_account_name
         annotations = var.operator_service_account_annotations
       }
       resources = var.operator_resources
@@ -29,7 +29,7 @@ locals {
       nodeCount = var.elasticsearch_node_count
       resources = var.elasticsearch_resources
       storage = {
-        size = var.elasticsearch_storage_size
+        size  = var.elasticsearch_storage_size
         class = var.elasticsearch_storage_class
       }
     }
@@ -51,39 +51,39 @@ resource "kubectl_manifest" "jaeger" {
 
       # Storage configuration
       storage = {
-        type = var.storage_type
+        type    = var.storage_type
         options = var.storage_options
       }
 
       # Ingress configuration
       ingress = {
-        enabled = var.ingress_enabled
+        enabled     = var.ingress_enabled
         annotations = var.ingress_annotations
-        hosts = var.ingress_hosts
-        tls = var.ingress_tls
+        hosts       = var.ingress_hosts
+        tls         = var.ingress_tls
       }
 
       # Query configuration
       query = {
-        replicas = var.query_replicas
-        resources = var.query_resources
+        replicas    = var.query_replicas
+        resources   = var.query_resources
         serviceType = var.query_service_type
-        options = var.query_options
+        options     = var.query_options
       }
 
       # Collector configuration
       collector = {
-        replicas = var.collector_replicas
-        resources = var.collector_resources
+        replicas    = var.collector_replicas
+        resources   = var.collector_resources
         serviceType = var.collector_service_type
-        options = var.collector_options
+        options     = var.collector_options
       }
 
       # Agent configuration
       agent = {
-        strategy = var.agent_strategy
+        strategy  = var.agent_strategy
         resources = var.agent_resources
-        options = var.agent_options
+        options   = var.agent_options
       }
 
       # UI configuration
@@ -96,7 +96,7 @@ resource "kubectl_manifest" "jaeger" {
 
       # Additional configuration
       annotations = var.jaeger_annotations
-      labels = var.jaeger_labels
+      labels      = var.jaeger_labels
     }, local.elasticsearch_config)
   })
 
@@ -115,10 +115,10 @@ resource "kubectl_manifest" "otel_collector" {
       namespace = var.jaeger_namespace
     }
     spec = {
-      mode = "deployment"
-      replicas = var.otel_collector_replicas
+      mode      = "deployment"
+      replicas  = var.otel_collector_replicas
       resources = var.otel_collector_resources
-      
+
       config = yamlencode({
         receivers = {
           otlp = {
@@ -132,7 +132,7 @@ resource "kubectl_manifest" "otel_collector" {
           batch = {}
           memory_limiter = {
             check_interval = "1s"
-            limit_mib = 1000
+            limit_mib      = 1000
           }
         }
         exporters = {
@@ -146,9 +146,9 @@ resource "kubectl_manifest" "otel_collector" {
         service = {
           pipelines = {
             traces = {
-              receivers = ["otlp"]
+              receivers  = ["otlp"]
               processors = ["memory_limiter", "batch"]
-              exporters = ["jaeger"]
+              exporters  = ["jaeger"]
             }
           }
         }

@@ -10,8 +10,8 @@ resource "helm_release" "external_secrets" {
     yamlencode({
       installCRDs = var.install_crds
       serviceAccount = {
-        create = true
-        name   = var.service_account_name
+        create      = true
+        name        = var.service_account_name
         annotations = var.service_account_annotations
       }
       webhook = {
@@ -107,7 +107,7 @@ resource "aws_iam_role_policy" "secrets_manager" {
         Resource = "*"
         Condition = {
           StringEquals = {
-            "aws:RequestedRegion": var.aws_region
+            "aws:RequestedRegion" : var.aws_region
           }
         }
       }
