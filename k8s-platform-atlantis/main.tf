@@ -1,120 +1,57 @@
-locals {
-  name      = var.name
-  namespace = var.namespace
-}
-
-data "aws_region" "current" {}
-
 resource "kubernetes_namespace" "atlantis" {
-  count = var.create_namespace ? 1 : 0
-
   metadata {
-    name = local.namespace
-    labels = merge(
-      var.namespace_labels,
-      {
-        "app.kubernetes.io/managed-by" = "terraform"
-      }
-    )
+    name   = var.namespace
+    labels = var.namespace_labels
   }
-}
-
-resource "kubernetes_secret" "atlantis_secrets" {
-  metadata {
-    name      = "${local.name}-secrets"
-    namespace = local.namespace
-  }
-
-  data = {
-    ATLANTIS_GH_TOKEN               = var.github_token
-    ATLANTIS_GH_WEBHOOK_SECRET      = var.github_webhook_secret
-    ATLANTIS_GITLAB_TOKEN           = var.gitlab_token
-    ATLANTIS_GITLAB_WEBHOOK_SECRET  = var.gitlab_webhook_secret
-    AWS_ACCESS_KEY_ID               = var.aws_access_key
-    AWS_SECRET_ACCESS_KEY           = var.aws_secret_key
-    ATLANTIS_REPO_CONFIG            = var.repo_config_json
-  }
-
-  depends_on = [kubernetes_namespace.atlantis]
-}
-
-resource "kubernetes_service_account" "atlantis" {
-  metadata {
-    name      = "${local.name}-sa"
-    namespace = local.namespace
-    annotations = merge(
-      {
-        "eks.amazonaws.com/role-arn" = var.iam_role_arn
-      },
-      var.service_account_annotations
-    )
-  }
-
-  depends_on = [kubernetes_namespace.atlantis]
 }
 
 resource "helm_release" "atlantis" {
-  name       = local.name
+  name       = "atlantis"
   repository = "https://runatlantis.github.io/helm-charts"
   chart      = "atlantis"
   version    = var.chart_version
-  namespace  = local.namespace
+  namespace  = kubernetes_namespace.atlantis.metadata[0].name
 
-  values = [
-    <<-EOT
-    image:
-      tag: "${var.image_tag}"
+  set {
+    name  = "orgWhitelist"
+    value = join(",", var.org_whitelist)
+  }
 
-    serviceAccount:
-      create: true
-      name: "${kubernetes_service_account.atlantis.metadata[0].name}"
+  set_sensitive {
+    name  = "github.token"
+    value = var.github_token
+  }
 
-    resources:
-      ${yamlencode(var.resources)}
+  set_sensitive {
+    name  = "github.secret"
+    value = var.github_webhook_secret
+  }
 
-    orgWhitelist: "${join(",", var.org_whitelist)}"
+  set {
+    name  = "atlantisUrl"
+    value = var.webhook_url
+  }
 
-    atlantisUrl: "${var.webhook_url}"
+  set {
+    name  = "ingress.enabled"
+    value = "true"
+  }
 
-    vcsSecret:
-      github:
-        token: "$ATLANTIS_GH_TOKEN"
-        webhookSecret: "$ATLANTIS_GH_WEBHOOK_SECRET"
-      gitlab:
-        token: "$ATLANTIS_GITLAB_TOKEN"
-        webhookSecret: "$ATLANTIS_GITLAB_WEBHOOK_SECRET"
+  set {
+    name  = "ingress.host"
+    value = var.ingress_host
+  }
 
-    aws:
-      region: "${data.aws_region.current.name}"
-      credentials:
-        secretName: "${local.name}-secrets"
-        accessKey: "AWS_ACCESS_KEY_ID"
-        secretKey: "AWS_SECRET_ACCESS_KEY"
+  set {
+    name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
+    value = var.iam_role_arn
+  }
 
-    repoConfig: "$ATLANTIS_REPO_CONFIG"
-
-    dataStorage:
-      enabled: true
-      storageClass: "${var.storage_class}"
-      size: "${var.storage_size}"
-
-    ingress:
-      enabled: ${var.ingress_enabled}
-      %{if var.ingress_enabled}
-      annotations:
-        ${yamlencode(var.ingress_annotations)}
-      hosts:
-        - host: ${var.ingress_host}
-          paths:
-            - path: /
-              pathType: Prefix
-      %{endif}
-    EOT
-  ]
-
-  depends_on = [
-    kubernetes_namespace.atlantis,
-    kubernetes_service_account.atlantis,
-    kubernetes_secret.atlantis_secrets
-  ]
+  dynamic "set" {
+    for_each = var.ingress_annotations
+    content {
+      name  = "ingress.annotations.${replace(set.key, ".", "\\.")}"
+      value = set.value
+    }
+  }
 }
