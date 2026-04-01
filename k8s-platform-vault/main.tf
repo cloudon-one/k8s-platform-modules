@@ -50,7 +50,7 @@ locals {
   }
 }
 
-resource "kubernetes_namespace" "vault" {
+resource "kubernetes_namespace_v1" "vault" {
   count = var.create_namespace ? 1 : 0
 
   metadata {
@@ -66,7 +66,7 @@ resource "kubernetes_namespace" "vault" {
 }
 
 # Create service account
-resource "kubernetes_service_account" "vault" {
+resource "kubernetes_service_account_v1" "vault" {
   metadata {
     name      = "${local.name}-sa"
     namespace = local.namespace
@@ -82,7 +82,7 @@ resource "kubernetes_service_account" "vault" {
     }
   }
 
-  depends_on = [kubernetes_namespace.vault]
+  depends_on = [kubernetes_namespace_v1.vault]
 }
 
 resource "helm_release" "vault" {
@@ -100,7 +100,7 @@ resource "helm_release" "vault" {
       storage_class        = var.storage_class
       storage_size         = var.storage_size
       audit_storage_size   = var.audit_storage_size
-      service_account_name = kubernetes_service_account.vault.metadata[0].name
+      service_account_name = kubernetes_service_account_v1.vault.metadata[0].name
       iam_role_arn         = var.iam_role_arn
       node_selector_key    = var.node_selector_key
       node_selector_value  = var.node_selector_value
@@ -115,7 +115,7 @@ resource "helm_release" "vault" {
   ]
 
   depends_on = [
-    kubernetes_namespace.vault,
-    kubernetes_service_account.vault
+    kubernetes_namespace_v1.vault,
+    kubernetes_service_account_v1.vault
   ]
 }

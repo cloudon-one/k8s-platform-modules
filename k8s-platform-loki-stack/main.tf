@@ -10,7 +10,7 @@ locals {
 }
 
 # Create namespace
-resource "kubernetes_namespace" "loki" {
+resource "kubernetes_namespace_v1" "loki" {
   metadata {
     name = var.namespace
     labels = {
@@ -122,10 +122,10 @@ resource "aws_iam_role_policy_attachment" "loki" {
 }
 
 # Create service account
-resource "kubernetes_service_account" "loki" {
+resource "kubernetes_service_account_v1" "loki" {
   metadata {
     name      = local.name
-    namespace = kubernetes_namespace.loki.metadata[0].name
+    namespace = kubernetes_namespace_v1.loki.metadata[0].name
     annotations = var.create_iam_resources ? {
       "eks.amazonaws.com/role-arn" = aws_iam_role.loki[0].arn
     } : {}
@@ -138,14 +138,14 @@ resource "helm_release" "loki" {
   repository = "https://grafana.github.io/helm-charts"
   chart      = "loki-stack"
   version    = var.chart_version
-  namespace  = kubernetes_namespace.loki.metadata[0].name
+  namespace  = kubernetes_namespace_v1.loki.metadata[0].name
 
   values = [
     templatefile("${path.module}/templates/values.yaml", {
       s3_bucket_name            = var.s3_bucket_name
       s3_region                 = data.aws_region.current.name
       retention_period          = var.retention_period
-      service_account           = kubernetes_service_account.loki.metadata[0].name
+      service_account           = kubernetes_service_account_v1.loki.metadata[0].name
       promtail_enabled          = var.promtail_enabled
       grafana_enabled           = var.grafana_enabled
       resources                 = var.resources
@@ -158,13 +158,7 @@ resource "helm_release" "loki" {
     })
   ]
 
-  dynamic "set" {
-    for_each = var.extra_values
-    content {
-      name  = set.key
-      value = set.value
-    }
-  }
+  set = [for k, v in var.extra_values : { name = k, value = tostring(v) }]
 }
 
 # Data sources

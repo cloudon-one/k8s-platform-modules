@@ -1,4 +1,4 @@
-resource "kubernetes_namespace" "argocd" {
+resource "kubernetes_namespace_v1" "argocd" {
   metadata {
     name = var.namespace
 
@@ -15,7 +15,7 @@ resource "helm_release" "argocd" {
   repository = "https://argoproj.github.io/argo-helm"
   chart      = "argo-cd"
   version    = var.argocd_version
-  namespace  = kubernetes_namespace.argocd.metadata[0].name
+  namespace  = kubernetes_namespace_v1.argocd.metadata[0].name
 
   values = [
     yamlencode({
@@ -138,7 +138,7 @@ resource "kubernetes_manifest" "git_repository" {
     kind       = "Repository"
     metadata = {
       name      = each.value.name
-      namespace = kubernetes_namespace.argocd.metadata[0].name
+      namespace = kubernetes_namespace_v1.argocd.metadata[0].name
     }
     spec = {
       url  = each.value.url
@@ -160,7 +160,7 @@ resource "kubernetes_manifest" "argocd_servicemonitor" {
     kind       = "ServiceMonitor"
     metadata = {
       name      = "argocd-metrics"
-      namespace = kubernetes_namespace.argocd.metadata[0].name
+      namespace = kubernetes_namespace_v1.argocd.metadata[0].name
       labels = {
         "app.kubernetes.io/component" = "metrics"
         "app.kubernetes.io/name"      = "argocd"
@@ -196,7 +196,7 @@ resource "kubernetes_manifest" "argocd_prometheusrule" {
     kind       = "PrometheusRule"
     metadata = {
       name      = "argocd-alerts"
-      namespace = kubernetes_namespace.argocd.metadata[0].name
+      namespace = kubernetes_namespace_v1.argocd.metadata[0].name
       labels = {
         "app.kubernetes.io/name" = "argocd"
         "prometheus"             = "true"
@@ -255,12 +255,12 @@ resource "kubernetes_manifest" "argocd_prometheusrule" {
 }
 
 # Grafana Dashboard ConfigMap
-resource "kubernetes_config_map" "argocd_dashboard" {
+resource "kubernetes_config_map_v1" "argocd_dashboard" {
   count = var.enable_monitoring ? 1 : 0
 
   metadata {
     name      = "argocd-dashboard"
-    namespace = kubernetes_namespace.argocd.metadata[0].name
+    namespace = kubernetes_namespace_v1.argocd.metadata[0].name
     labels = {
       grafana_dashboard = "true"
     }
@@ -272,12 +272,12 @@ resource "kubernetes_config_map" "argocd_dashboard" {
 }
 
 # AlertManager configuration for notifications
-resource "kubernetes_secret" "alertmanager_config" {
+resource "kubernetes_secret_v1" "alertmanager_config" {
   count = var.enable_monitoring && (var.alert_slack_webhook != "" || var.alert_email_to != "") ? 1 : 0
 
   metadata {
     name      = "alertmanager-argocd"
-    namespace = kubernetes_namespace.argocd.metadata[0].name
+    namespace = kubernetes_namespace_v1.argocd.metadata[0].name
   }
 
   data = {
@@ -316,7 +316,7 @@ resource "kubernetes_secret" "alertmanager_config" {
   }
 }
 
-resource "kubernetes_secret" "repo_credentials" {
+resource "kubernetes_secret_v1" "repo_credentials" {
   for_each = {
     for repo in var.repositories : repo.name => repo
     if repo.credentials != null
@@ -324,7 +324,7 @@ resource "kubernetes_secret" "repo_credentials" {
 
   metadata {
     name      = "repo-${each.key}"
-    namespace = kubernetes_namespace.argocd.metadata[0].name
+    namespace = kubernetes_namespace_v1.argocd.metadata[0].name
     labels = {
       "argocd.argoproj.io/secret-type" = "repository"
     }
@@ -344,14 +344,14 @@ resource "kubernetes_secret" "repo_credentials" {
 }
 
 # Secret for GitHub App credentials
-resource "kubernetes_secret" "github_app_credentials" {
+resource "kubernetes_secret_v1" "github_app_credentials" {
   for_each = {
     for app in var.github_apps : app.id => app
   }
 
   metadata {
     name      = "github-app-${each.key}"
-    namespace = kubernetes_namespace.argocd.metadata[0].name
+    namespace = kubernetes_namespace_v1.argocd.metadata[0].name
     labels = {
       "argocd.argoproj.io/secret-type" = "github-app"
     }
@@ -365,14 +365,14 @@ resource "kubernetes_secret" "github_app_credentials" {
 }
 
 # Secret for repository certificates
-resource "kubernetes_secret" "repo_certs" {
+resource "kubernetes_secret_v1" "repo_certs" {
   for_each = {
     for cert in var.repositories_cert : cert.server_name => cert
   }
 
   metadata {
     name      = "repo-cert-${each.key}"
-    namespace = kubernetes_namespace.argocd.metadata[0].name
+    namespace = kubernetes_namespace_v1.argocd.metadata[0].name
     labels = {
       "argocd.argoproj.io/secret-type" = "repository-certificates"
     }
@@ -385,11 +385,11 @@ resource "kubernetes_secret" "repo_certs" {
 
 # Deploy network policies for enhanced security
 resource "kubernetes_manifest" "argocd_network_policies" {
-  count = var.enable_network_policies ? 1 : 0
-
-  for_each = toset(split("---", templatefile("${path.module}/templates/network-policy.yaml", {
-    namespace = var.namespace
-  })))
+  for_each = var.enable_network_policies ? toset([
+    for doc in split("---", templatefile("${path.module}/templates/network-policy.yaml", {
+      namespace = var.namespace
+    })) : trimspace(doc) if trimspace(doc) != ""
+  ]) : toset([])
 
   manifest = yamldecode(each.value)
 

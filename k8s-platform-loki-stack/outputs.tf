@@ -1,6 +1,6 @@
 output "namespace" {
   description = "Namespace where Loki is deployed"
-  value       = kubernetes_namespace.loki.metadata[0].name
+  value       = kubernetes_namespace_v1.loki.metadata[0].name
 }
 
 output "release_name" {
@@ -20,5 +20,5 @@ output "iam_role_arn" {
 
 output "service_account_name" {
   description = "Name of the Loki service account"
-  value       = kubernetes_service_account.loki.metadata[0].name
+  value       = kubernetes_service_account_v1.loki.metadata[0].name
 }

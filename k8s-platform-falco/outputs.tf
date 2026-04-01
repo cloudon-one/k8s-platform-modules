@@ -1,6 +1,6 @@
 output "namespace" {
   description = "Namespace where Falco is deployed"
-  value       = kubernetes_namespace.falco.metadata[0].name
+  value       = kubernetes_namespace_v1.falco.metadata[0].name
 }
 
 output "release_name" {

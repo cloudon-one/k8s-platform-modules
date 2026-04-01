@@ -97,7 +97,7 @@ resource "aws_db_instance" "kong" {
 }
 
 # Kong Namespace
-resource "kubernetes_namespace" "kong" {
+resource "kubernetes_namespace_v1" "kong" {
   metadata {
     name = var.kubernetes_namespace
     labels = {
@@ -107,10 +107,10 @@ resource "kubernetes_namespace" "kong" {
 }
 
 # Kong Secrets
-resource "kubernetes_secret" "kong_database" {
+resource "kubernetes_secret_v1" "kong_database" {
   metadata {
     name      = "kong-database-password"
-    namespace = kubernetes_namespace.kong.metadata[0].name
+    namespace = kubernetes_namespace_v1.kong.metadata[0].name
   }
 
   data = {
@@ -124,7 +124,7 @@ resource "helm_release" "kong" {
   repository = "https://charts.konghq.com"
   chart      = "kong"
   version    = var.kong_chart_version
-  namespace  = kubernetes_namespace.kong.metadata[0].name
+  namespace  = kubernetes_namespace_v1.kong.metadata[0].name
 
   values = [
     templatefile("${path.module}/templates/values.yaml", {
@@ -140,11 +140,5 @@ resource "helm_release" "kong" {
     })
   ]
 
-  dynamic "set" {
-    for_each = var.extra_values
-    content {
-      name  = set.key
-      value = set.value
-    }
-  }
+  set = [for k, v in var.extra_values : { name = k, value = tostring(v) }]
 }

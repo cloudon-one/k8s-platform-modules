@@ -1,6 +1,6 @@
 output "namespace" {
   description = "Namespace where compliance scanner is deployed"
-  value       = kubernetes_namespace.compliance_scanner.metadata[0].name
+  value       = kubernetes_namespace_v1.compliance_scanner.metadata[0].name
 }
 
 output "release_name" {

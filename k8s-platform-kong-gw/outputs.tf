@@ -1,6 +1,6 @@
 output "namespace" {
   description = "Namespace where Kong is deployed"
-  value       = kubernetes_namespace.kong.metadata[0].name
+  value       = kubernetes_namespace_v1.kong.metadata[0].name
 }
 
 output "release_name" {

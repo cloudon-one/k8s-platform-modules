@@ -1,6 +1,6 @@
 output "namespace" {
   description = "Namespace where Kyverno is deployed"
-  value       = kubernetes_namespace.kyverno.metadata[0].name
+  value       = kubernetes_namespace_v1.kyverno.metadata[0].name
 }
 
 output "release_name" {

@@ -1,4 +1,4 @@
-resource "kubernetes_namespace" "kyverno" {
+resource "kubernetes_namespace_v1" "kyverno" {
   metadata {
     name = var.namespace
     labels = {
@@ -12,47 +12,18 @@ resource "helm_release" "kyverno" {
   repository = "https://kyverno.github.io/kyverno"
   chart      = "kyverno"
   version    = var.chart_version
-  namespace  = kubernetes_namespace.kyverno.metadata[0].name
+  namespace  = kubernetes_namespace_v1.kyverno.metadata[0].name
 
-  set {
-    name  = "replicaCount"
-    value = var.replica_count
-  }
-
-  set {
-    name  = "backgroundController.replicas"
-    value = var.background_controller_replicas
-  }
-
-  set {
-    name  = "reportsController.replicas"
-    value = var.reports_controller_replicas
-  }
-
-  set {
-    name  = "admissionController.replicas"
-    value = var.admission_controller_replicas
-  }
-
-  set {
-    name  = "resources.limits.memory"
-    value = var.resources.limits.memory
-  }
-
-  set {
-    name  = "resources.limits.cpu"
-    value = var.resources.limits.cpu
-  }
-
-  set {
-    name  = "resources.requests.memory"
-    value = var.resources.requests.memory
-  }
-
-  set {
-    name  = "resources.requests.cpu"
-    value = var.resources.requests.cpu
-  }
+  set = [
+    { name = "replicaCount", value = tostring(var.replica_count) },
+    { name = "backgroundController.replicas", value = tostring(var.background_controller_replicas) },
+    { name = "reportsController.replicas", value = tostring(var.reports_controller_replicas) },
+    { name = "admissionController.replicas", value = tostring(var.admission_controller_replicas) },
+    { name = "resources.limits.memory", value = tostring(var.resources.limits.memory) },
+    { name = "resources.limits.cpu", value = tostring(var.resources.limits.cpu) },
+    { name = "resources.requests.memory", value = tostring(var.resources.requests.memory) },
+    { name = "resources.requests.cpu", value = tostring(var.resources.requests.cpu) },
+  ]
 }
 
 resource "kubernetes_manifest" "require_approved_registries" {
