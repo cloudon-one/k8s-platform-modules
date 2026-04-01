@@ -10,7 +10,7 @@ locals {
 }
 
 # Create namespace for Kubecost
-resource "kubernetes_namespace" "kubecost" {
+resource "kubernetes_namespace_v1" "kubecost" {
   metadata {
     name = var.namespace
     labels = {
@@ -109,10 +109,10 @@ resource "aws_iam_role_policy_attachment" "kubecost" {
 }
 
 # Create service account
-resource "kubernetes_service_account" "kubecost" {
+resource "kubernetes_service_account_v1" "kubecost" {
   metadata {
     name      = local.name
-    namespace = kubernetes_namespace.kubecost.metadata[0].name
+    namespace = kubernetes_namespace_v1.kubecost.metadata[0].name
     annotations = var.create_iam_resources ? {
       "eks.amazonaws.com/role-arn" = aws_iam_role.kubecost[0].arn
     } : {}
@@ -125,14 +125,14 @@ resource "helm_release" "kubecost" {
   repository = "https://kubecost.github.io/cost-analyzer/"
   chart      = "cost-analyzer"
   version    = var.chart_version
-  namespace  = kubernetes_namespace.kubecost.metadata[0].name
+  namespace  = kubernetes_namespace_v1.kubecost.metadata[0].name
 
   values = [
     templatefile("${path.module}/templates/values.yaml", {
       cluster_name         = var.cluster_name
       prometheus_enabled   = var.prometheus_enabled
       grafana_enabled      = var.grafana_enabled
-      service_account_name = kubernetes_service_account.kubecost.metadata[0].name
+      service_account_name = kubernetes_service_account_v1.kubecost.metadata[0].name
       ingress_enabled      = var.ingress_enabled
       ingress_host         = var.ingress_host
       ingress_annotations  = var.ingress_annotations
@@ -143,13 +143,7 @@ resource "helm_release" "kubecost" {
     })
   ]
 
-  dynamic "set" {
-    for_each = var.extra_values
-    content {
-      name  = set.key
-      value = set.value
-    }
-  }
+  set = [for k, v in var.extra_values : { name = k, value = tostring(v) }]
 }
 
 # Data sources

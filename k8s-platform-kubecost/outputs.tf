@@ -1,11 +1,11 @@
 output "namespace" {
   description = "Kubernetes namespace"
-  value       = kubernetes_namespace.kubecost.metadata[0].name
+  value       = kubernetes_namespace_v1.kubecost.metadata[0].name
 }
 
 output "service_account_name" {
   description = "Service account name"
-  value       = kubernetes_service_account.kubecost.metadata[0].name
+  value       = kubernetes_service_account_v1.kubecost.metadata[0].name
 }
 
 output "role_arn" {

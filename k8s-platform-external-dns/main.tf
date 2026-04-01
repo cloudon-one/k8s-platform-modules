@@ -55,13 +55,7 @@ resource "helm_release" "external_dns" {
     })
   ]
 
-  dynamic "set" {
-    for_each = var.additional_set_values
-    content {
-      name  = set.value.name
-      value = set.value.value
-    }
-  }
+  set = [for s in var.additional_set_values : { name = s.name, value = tostring(s.value) }]
 }
 
 # AWS IAM Role for external-dns

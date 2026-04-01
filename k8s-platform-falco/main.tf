@@ -1,4 +1,4 @@
-resource "kubernetes_namespace" "falco" {
+resource "kubernetes_namespace_v1" "falco" {
   metadata {
     name = var.namespace
     labels = {
@@ -12,50 +12,17 @@ resource "helm_release" "falco" {
   repository = "https://falcosecurity.github.io/charts"
   chart      = "falco"
   version    = var.chart_version
-  namespace  = kubernetes_namespace.falco.metadata[0].name
+  namespace  = kubernetes_namespace_v1.falco.metadata[0].name
 
-  set {
-    name  = "driver.kind"
-    value = var.driver.kind
-  }
-
-  set {
-    name  = "driver.enabled"
-    value = tostring(var.driver.enabled)
-  }
-
-  set {
-    name  = "resources.limits.memory"
-    value = var.resources.limits.memory
-  }
-
-  set {
-    name  = "resources.limits.cpu"
-    value = var.resources.limits.cpu
-  }
-
-  set {
-    name  = "resources.requests.memory"
-    value = var.resources.requests.memory
-  }
-
-  set {
-    name  = "resources.requests.cpu"
-    value = var.resources.requests.cpu
-  }
-
-  set {
-    name  = "falco.json_output"
-    value = "true"
-  }
-
-  set {
-    name  = "falco.log_stderr"
-    value = "true"
-  }
-
-  set {
-    name  = "falco.log_level"
-    value = "info"
-  }
+  set = [
+    { name = "driver.kind", value = tostring(var.driver.kind) },
+    { name = "driver.enabled", value = tostring(var.driver.enabled) },
+    { name = "resources.limits.memory", value = tostring(var.resources.limits.memory) },
+    { name = "resources.limits.cpu", value = tostring(var.resources.limits.cpu) },
+    { name = "resources.requests.memory", value = tostring(var.resources.requests.memory) },
+    { name = "resources.requests.cpu", value = tostring(var.resources.requests.cpu) },
+    { name = "falco.json_output", value = "true" },
+    { name = "falco.log_stderr", value = "true" },
+    { name = "falco.log_level", value = "info" },
+  ]
 }
